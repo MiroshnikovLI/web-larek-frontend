@@ -1,4 +1,7 @@
 // Хорошая практика даже простые типы выносить в алиасы
+
+import { Api } from "./api";
+
 // Зато когда захотите поменять это достаточно сделать в одном месте
 type EventName = string | RegExp;
 type Subscriber = Function;
@@ -28,7 +31,7 @@ export class EventEmitter implements IEvents {
     /**
      * Установить обработчик на событие
      */
-    on<T extends object>(eventName: EventName, callback: (event: T) => void) {
+    on<T extends object>(eventName: EventName, callback: (event: T) => void, p0?: { contentApi: Api; "": any; }) {
         if (!this._events.has(eventName)) {
             this._events.set(eventName, new Set<Subscriber>());
         }
