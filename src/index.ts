@@ -1,9 +1,9 @@
 import './scss/styles.scss';
 import { API_URL, } from './utils/constants';
 import { Api, } from './components/base/api';
-import { IAPIresponse, ICard, } from './types';
+import { IAPIresponse, } from './types';
 import { ModalWindows, Success } from './components/Modal';
-import { CardsBasket, CardsShow} from './components/Cards';
+import { CardsBasket, CardsElements} from './components/Cards';
 import { Page } from './components/Page';
 import { EventEmitter } from './components/base/events';
 import { Basket } from './components/Basket';
@@ -11,30 +11,46 @@ import { Product, ProductApi } from './components/Product';
 import { cloneTemplate } from './utils/utils';
 import { CustomerInformation } from './components/Data';
 import { Form } from './components/Form';
+import { ICard } from './types/Cards';
 
-// Подключение к серверу
+/**
+ * Подключение к серверу
+ */
 const contentApi = new Api(API_URL);
 
-// Подписка на обработчик событий
+/**
+ *  Подписка на обработчик событий
+ */ 
 const events = new EventEmitter();
 
-// Продукт
+/**
+ * Продукт
+ */
 const product = new ProductApi(events);
 
-// Елементы страницы
+/**
+ * Элементы страницы
+ */ 
 const pageCont = new Page(document.querySelector('.page'));
 
-// Модальное окно
+/**
+ * Модальное окно
+ */ 
 const modalka = new ModalWindows(pageCont.body, pageCont.modal, 'modal_active', events);
 
-// Карзина
+/**
+ * Корзина
+ */
 const basket = new Basket(cloneTemplate(pageCont.basketTemplate));
 
-// Информации о клиенте
+/**
+ * Информации о клиенте
+ */
 const information = new CustomerInformation();
 
-// Закрытие модального окна по кнопке ESC
-
+/**
+ * Закрытие модального окна по кнопке ESC
+ */
 const closeEsc = function(evt: KeyboardEvent) {
   if(evt.code === 'Escape') {
     modalka.closeModal();
@@ -49,7 +65,9 @@ events.on('close:modal:keydown:esc:remove', () =>
   pageCont.body.removeEventListener('keydown', closeEsc)
 );
 
-// Закрытие модального окна по клику вне модального окна
+/**
+ * Закрытие модального окна по клику вне модального окна
+ */
 const closeKlick = function(evt: Event) {
   const el = evt.target as HTMLElement;
   if(el.id === 'modal-container') {
@@ -65,29 +83,39 @@ events.on('close:modal:click:remove', () =>
   modalka.getModal().removeEventListener('click', closeKlick)
 );
 
-// Закрытие модального окна по кнопке крестик
+/**
+ * Закрытие модального окна по кнопке крестик
+ */
 modalka.getButtonClose().addEventListener('click', () => modalka.closeModal())
 
-// Кнопка карзины на главном экране
+/**
+ * Кнопка корзины на главном экране
+ */
 pageCont.buttonBasket.addEventListener('click', () => {
   modalka.openModal();
   events.emit('click:basket');
 })
 
-// Счетчик карзины
+/**
+ * Счетчик корзины
+ */
 events.on('counter:basket', () => pageCont.basketCounter.textContent = `${basket.getLengthProduct()}`)
 
-// Получение массива продукта
+/**
+ * Получение массива продукта
+ */
 contentApi.get('/product')
 .then((ress: IAPIresponse)  => {
   product.setMassProduct(ress.items as ICard[]);
 })
 .catch((err) => console.log(err));
 
-// Отображение карточек 
+/**
+ * Отображение карточек 
+ */
 events.on('product:view', () => {
   product.getMassProduct().forEach(el => {
-    const show = new CardsShow(cloneTemplate(pageCont.cardCatalogTemplate));
+    const show = new CardsElements(cloneTemplate(pageCont.cardCatalogTemplate));
     const prod = new Product(
       el.id,
       el.description,
@@ -99,14 +127,16 @@ events.on('product:view', () => {
     
     show.getCard().addEventListener('click', () => events.emit('click:card:page', prod))
 
-    pageCont.gallery.append(show.getCardsCatalogView(prod))
+    pageCont.gallery.append(show.renderCatologCards(prod))
   })
 })
 
-// Клик на карточку
+/**
+ * Клик на карточку
+ */
 events.on('click:card:page', (product) => {
   modalka.openModal();
-  const show = new CardsShow(cloneTemplate(pageCont.cardPreviewTemplate))
+  const show = new CardsElements(cloneTemplate(pageCont.cardPreviewTemplate))
   
   if(Object(product).price === null) {
     show.getButtonCard().disabled = true;
@@ -118,17 +148,21 @@ events.on('click:card:page', (product) => {
     show.getButtonCard().addEventListener('click', () => events.emit('click:add:basket', product))
   }
 
-  pageCont.modalContent.append(show.getProductView(Object(product)));
+  pageCont.modalContent.append(show.renderCards(Object(product)));
 })
 
-// Добавление в карзину
+/**
+ * Добавление в корзину
+ */
 events.on('click:add:basket', (product) => {
   basket.setProductBasket(Object(product));
   modalka.closeModal();
   events.emit('counter:basket');
 })
 
-// Открытие карзины
+/**
+ * Открытие корзины
+ */
 events.on('click:basket', () => {
   modalka.openModal();
   basket.clearBasketList();
@@ -161,7 +195,9 @@ events.on('click:basket', () => {
   }
 })
 
-// Отображение формы ордер
+/**
+ * Отображение формы ордер
+ */
 events.on('click:form:order', () => {
   modalka.clearModalContent();
   const form = new Form(cloneTemplate(pageCont.orderTemplate))
@@ -185,7 +221,9 @@ events.on('click:form:order', () => {
   
 })
 
-// Отображение формы контакт
+/**
+ * Отображение формы контакт
+ */
 events.on('click:form:content', () => {
   modalka.clearModalContent();
   const form = new Form(cloneTemplate(pageCont.contactsTemplate));
@@ -208,12 +246,16 @@ events.on('click:form:content', () => {
   })
 })
 
-// Отправка данных на сервер
+/**
+ * Отправка данных на сервер
+ */
 events.on('send:info:server', async () => {
    contentApi.post('', product.getToSendProduct(basket.getAllProduct(), information.getMassInfo()))
 })
 
-// Клик на кнопку оплатить 
+/**
+ * Клик на кнопку оплатить 
+ */
 events.on('click:pay', () => {
   modalka.getModalContent().innerHTML = '';
   const success = new Success(cloneTemplate(pageCont.successTemplate), basket, modalka);

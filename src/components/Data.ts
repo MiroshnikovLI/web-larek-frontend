@@ -1,41 +1,54 @@
-export class CustomerInformation {
-  protected _massInfo: IMassInfo = {
-    formOfPayment: '',
-    address: '',
-    email: '',
-    phone: '',
-  }
+// import { ICustomerInformation, IMassInfo } from "../types/Data";
 
-  getMassInfo() {
-    const mass = this._massInfo;
-    return mass;
-  }
+// /**
+//  * Класс информации о закахе
+//  */
+// export class CustomerInformation implements ICustomerInformation {
+//   /**
+//    * Массив информации о заказе
+//    */
+//   protected _massInfo: IMassInfo = {
+//     formOfPayment: '',
+//     address: '',
+//     email: '',
+//     phone: '',
+//   }
 
-  setInfo(info: string, value: string) {
-    if(info) {
-      this._massInfo[info as keyof typeof this._massInfo] = value;
-    }
-  }
+//   /**
+//    * Получить массив заказа
+//    */
+//   getMassInfo() {
+//     const mass = this._massInfo;
+//     return mass;
+//   }
 
-  getInfo(info: string) {
-    if(info) {
-      return this._massInfo[info as keyof typeof this._massInfo];
-    }
-  }
+//   /**
+//    * Установить информацию по строке
+//    */
+//   setInfo(info: string, value: string): void {
+//     if(info) {
+//       this._massInfo[info as keyof typeof this._massInfo] = value;
+//     }
+//   }
 
-  deleteInfo() {
-    this._massInfo = {
-      formOfPayment: '',
-      address: '',
-      email: '',
-      phone: '',
-    }
-  }
-}
+//   /**
+//    * Получить информацию по строке
+//    */
+//   getInfo(info: string) {
+//     if(info) {
+//       return this._massInfo[info as keyof typeof this._massInfo];
+//     }
+//   }
 
-export interface IMassInfo {
-  formOfPayment: string;
-  address: string;
-  email: string;
-  phone: string;
-}
+//   /**
+//    * Очистить массив информации заказа
+//    */
+//   deleteInfo() {
+//     this._massInfo = {
+//       formOfPayment: '',
+//       address: '',
+//       email: '',
+//       phone: '',
+//     }
+//   }
+// }

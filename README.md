@@ -46,52 +46,110 @@ yarn build
 ## Получение данных с сервера
 
 ```
-- Массив данных карточки
 
-  // Интервейс описывающий работу с API
-    interface IApiProductData {
-
-    // базовый url API
+class Api {
+    // URL страницы данных
     readonly baseUrl: string;
 
-    // Get запрос
-    getApi(url: string): Promise<IProduct>;
+    // Метод получение/передачи данных
+    protected options: RequestInit;
 
-    // Post запрос
-    setApi(url: string): Promise<T>;
-  }
+    // Получить данные
+    get(uri: string) 
+
+    // Отправить данные
+    post(uri: string, data: object, method: ApiPostMethods = 'POST')
+}
+
 ```
 
 ## Корзина 
 
 ```
-- Массив купленых товаров
-- Добавление товара в корзину
-- Удалить один товар с корзины
-- Сумма товаров
-- Колличество добавленого в корзину товара
-- Очистка корзины
+
+class Basket {
+
+  // Добавления продукта в корзину
+  setProductBasket(product: IProduct): void
+
+  // Удаление продукта из корзины
+  deleteProduct(product: IProduct): void
+
+  // Удалить все продукты с корзины
+  deleteAllProduct(): void
+
+  // Получить количество товара в корзине
+  getLengthProduct(): number
+
+  // Получить полный список покупок
+  getAllProduct(): IProduct[]
+
+  // Получить полную сумму корзины
+  getPriceAll(): string
+
+  // Очиста листа покупок
+  clearBasketList(): void
+
+}
+
 ```
 
 ## Товар
 
 ```
-- Карточка товара
-  - ID товара
-  - Котегория
-  - Наименование
-  - Изображение
-  - Цена
+
+class Product {
+
+  // ID продукта
+  id: string;
+
+  // Описание продукта
+  description: string;
+  
+  // Изображение продукта
+  image: string;
+  
+  // Название продукта
+  title: string;
+  
+  // Котегория продукта
+  category: string;
+  
+  // Цена продукта
+  price: number | null;
+
+}
+
 ```
 
-## Пользователь
+## Информация о заказе
 
 ```
-- Способ оплаты
-- Адрес
-- E-mail
-- Телефон
-- Валидация
+
+class CustomerInformation {
+
+  // Массив данных заказа
+  protected _massInfo: IMassInfo = {
+    formOfPayment: '',
+    address: '',
+    email: '',
+    phone: '',
+  }
+  
+  // Получить массив заказа
+  getMassInfo(): IMassInfo
+
+  // Установить информацию по строке
+  setInfo(info: string, value: string): void
+
+  // Получить информацию по строке
+  getInfo(info: string): string
+
+  // Очистить массив информации заказа
+  deleteInfo(): void
+
+}
+
 ```
 
 # Отображение
@@ -100,34 +158,50 @@ yarn build
 
 ### Вывод карточки на главый экран
 ```
-  - Котегория
-  - Наименование
-  - Изображение
-  - Цена
+
+class CardsElements extends ICotegoreCards {
+
+  // Отображение на главное странице
+  // Устонавливает данные товара в карточку на главной странице
+  renderCatologCards(product: IProduct): HTMLElement
+
+}
+
 ```
 
-### Вывод обной карточки
+### Вывод одной карточки
 ```
-- Изображение
-- Котегории
-- Наименование
-- Описание
-- Кнопка добавление я корзину
-- Кнопка закрытия карточки
-- Цена
+
+class CardsElements extends ICotegoreCards {
+
+  // Отображение отдельной карточки
+  // Устонавливает данные товара в карточку в одиночном товара
+  renderCards(product: IProduct): HTMLElement
+
+}
+
 ```
 
 ## Корзина 
 
 ```
-- Кнопка закрытия корзины
-- Товар добавленый в корзину
-  - Номер позиции товара
-  - Наименование 
-  - Цена
-  - Кнопка удаления товара из корзины
-- Кнопка офрмить заказ
-- Общая сумма добавленых товаров в корзину
+
+class Basket {
+
+  // Получить корзину
+  getBasket(): HTMLElement
+
+  // Получить лист корзины
+  getBasketList(): HTMLElement
+
+  // Получить кнопку корзины
+  getBasketButton(): HTMLButtonElement
+
+  // Получить Элемент цены корзины 
+  getPriceBasket(): HTMLElement
+
+}
+
 ```
 
 ## Формы
@@ -135,11 +209,45 @@ yarn build
 ### Форма
 
 ```
-- Кнопка закрытие формы
-- Кнопки выбора оплаты
-  - Онлайн
-  - При получение
-- Адрес доставки
-- E-mail
-- Телефон
-- Кнопка оформить заказ
+
+class Form implements IForm {
+
+  // Форма
+  protected _forms: HTMLFormElement;
+
+  // Кнопка отправки формы
+  protected _buttonSubmit: HTMLButtonElement;
+
+  // Контейнер ошибок формы
+  protected _errorContainer: HTMLElement;
+
+  // Массив валидации формы
+  formValid: IFormValid;
+
+  // Массив ошибок формы
+  readonly _errorMessage: IErrorMessage
+
+  // Вывод ошибок формы
+  getErrorMessage(value1: string, value2: string): string
+
+  // Получить все инпуты формы
+  getInputForm(): NodeListOf<HTMLInputElement>
+
+  // Валидация инпутов
+  getValidationInput(el: boolean, mass: string): boolean
+
+  // Отключение кнопки формы
+  getDisablesButton(bool1: boolean, bool2: boolean): boolean
+
+  // Валидация кнопак оплаты
+  validButtonPayment(info: CustomerInformation): void
+
+  // Форма
+  getForm(): HTMLFormElement
+
+  // Возвращает кнопку сабмита формы
+  getButtonSubmit(): HTMLButtonElement
+
+}
+
+```
