@@ -1,64 +1,52 @@
-import { IProduct } from "./Product"
+import { Component } from "../components/base/Component";
+import { IProduct } from "./Product";
 
-/**
- * Класс котегории товара
- */
-export interface ICotegoreCards {
-  /**
-   * Установить класс товара в соответствии с категорией
-   */
-  setClassCards(product: IProduct): string
+/** Класс Элементов карточки */
+export interface ICardsElements extends Component<ICardsElements> {
+  /** Карточка */
+  _card: HTMLElement;
+
+  /** Элемент карточки: Котегория */
+  _cotegory: HTMLElement;
+
+  /** Элемент карточки: Изображение */
+  _image: HTMLImageElement;
+
+  /** Элемент карточки: Заголовок */
+  _title: HTMLElement;
+
+  /** Элемент карточки: Ценна */
+  _price: HTMLElement;
+
+  /** Элемент карточки: Описание */
+  _text: HTMLElement;
+
+  /** Элемент карточки: Кнопка */
+  _button: HTMLButtonElement;
+
+  /** Массив котегорий карточек */
+  readonly massCotegory: ImassCotegory
+
+  /** Установить изображение */
+  set imgValue(product: IProduct)
+
+  /** Установить цену продукта */
+  set priceValue(product: IProduct)
+
+  /** Установить категорию продукта */
+  set cotegoryValue(product: IProduct)
+
+  /** Установить заголовок продукта */
+  set titleValue(product: IProduct)
+
+  /** Установить описание продукта */
+  set textValue(product: IProduct)
 }
 
-/**
- * Класс Элементов карточки
- */
-export interface ICardsElements extends ICotegoreCards {
-
-  /**
-   * Отображение на главное странице
-   * Устонавливает данные товара в карточку на главной странице
-   */
-  renderCatologCards(product: IProduct): HTMLElement
-
-  /**
-   * Отображение отдельной карточки
-   * Устонавливает данные товара в карточку в одиночном товара
-   */
-  renderCards(product: IProduct): HTMLElement
-
-  /**
-   * Возвращает HTMLElement карточки товара
-   */
-  getCard(): HTMLElement 
-
-  /**
-   *  Возвращает кнопку карточки
-   */
-  getButtonCard(): HTMLButtonElement
-}
-
-/**
- * Класс Элементов корзины
- */
-export interface ICardsBasket extends ICardsElements {
-  /**
-   * Возвращает карточку товара корзины
-   */
-  getCardsBasketView(product: IProduct): HTMLElement
-
-  /**
-   * Возвращает Элемент индекса корзины
-   */
-  getIndexBasket(): HTMLElement
-}
-
-export interface ICard {
-  id: string;
-  description: string;
-  image: string;
-  title: string;
-  category: string;
-  price: number | null;
-  addBasket: true | false;
+export interface ImassCotegory {
+  'софт-скил': string;
+  'другое': string;
+  'дополнительное': string;
+  'кнопка': string;
+  'хард-скил': string;
 }

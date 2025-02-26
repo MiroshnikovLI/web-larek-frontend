@@ -1,62 +1,45 @@
-import { ICard } from "./Cards";
-import { IMassInfo } from "./Data";
+import { EventEmitter } from "../components/base/events";
 
-/**
- * Класс получающий карточки продукта
- */
 export interface IProductApi {
+  /** Емитер */
+  events: EventEmitter;
 
-  /**
-   * Массив продукта
-   */
+  /** Массив для отправки на сервер */
+  оrderAmount: IOrderAmount
+
+  /** Массив продукта */
   massProduct: IProduct[];
 
-  /**
-   * Записать массив продуктов
-   */
-  setMassProduct(product: ICard[]): void
+  /** Записать массив продуктов */
+  setMassProduct(product: IProduct[]): void
 
-  /**
-   * Получить массив продуктов
-   */
+  /** Получить массив продуктов */
   getMassProduct(): IProduct[]
  
-  /**
-   * Получить продукт по ID
-   */
+  /** Получить продукт по ID */
   getOneProduct(product: IProduct): string
 
-  /**
-   * Получить массив заказа
-   */
+  /** Получить массив заказа */
   getToSendProduct(product: IProduct[], userInfo: IMassInfo): IOrderAmount
 }
 
-
 export interface IProduct {
-  /**
-   * ID продукта
-   */
+  /** ID продукта */
   id: string;
-  /**
-   * Описание продукта
-   */
+
+  /** Описание продукта */
   description: string;
-  /**
-   * Изображение продукта
-   */
+
+  /** Изображение продукта */
   image: string;
-  /**
-   * Название продукта
-   */
+
+  /** Название продукта */
   title: string;
-  /**
-   * Котегория продукта
-   */
+
+  /** Котегория продукта */
   category: string;
-  /**
-   * Цена продукта
-   */
+
+  /** Цена продукта */
   price: number | null;
 }
 
@@ -65,11 +48,9 @@ export interface IOrderAmount {
   userInfo: IMassInfo;
 }
 
-export interface IProductData  {
-  id: string;
-  description: string;
-  image: string;
-  title: string;
-  category: string;
-  price: number | null;
+export interface IMassInfo {
+  formOfPayment: string;
+  address: string;
+  email: string;
+  phone: string;
 }

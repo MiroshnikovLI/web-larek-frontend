@@ -1,11 +1,10 @@
-import { ICard } from "./Cards";
-import { IProductData } from "./Product";
+import { IProduct } from "./Product";
 
 export interface IAPIresponse {
-  items: ICard[];
+  items: IProduct[];
 }
 
 export interface IApiProductData {
-  items: Promise<IProductData>;
+  items: Promise<IProduct>;
   readonly baseUrl: string;
 }

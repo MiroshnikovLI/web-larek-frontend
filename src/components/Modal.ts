@@ -1,140 +1,130 @@
-// import { IModalWindows, ISuccess } from "../types/Modal";
-// import { EventEmitter } from "./base/events";
-// import { Basket } from "./Basket";
+import { IModalElement, IModalWindows, ISuccess, } from "../types/Modal";
+import { Component } from "./base/Component";
+import { EventEmitter } from "./base/events";
 
-// export class ModalWindows implements IModalWindows {
-//   /**
-//    * Контейнер модального окна
-//    */
-//   protected _modal: HTMLElement;
+abstract class ModalElement extends Component<IModalElement> implements IModalElement {
+  /** Контейнер модального окна */
+  _modal: HTMLElement;
 
-//   /**
-//    * Контейнер страницы
-//    */
-//   protected _body: HTMLElement;
+  /** Контейнер страницы */
+  _body: HTMLElement;
 
-//   /**
-//    * Контейнер для вставки контента
-//    */
-//   protected _modalContent: HTMLElement;
+  /** Контейнер для вставки контента */
+  _modalContent: HTMLElement;
 
-//   /**
-//    * Класс открытия модального окна
-//    */
-//   protected _data: string;
+  /** Класс открытия модального окна */
+  _class: string;
 
-//   /**
-//    * Класс емитера
-//    */
-//   protected events: EventEmitter;
+  /** Класс емитера */
+  events: EventEmitter;
 
-//   /**
-//    * Кнопка закрытия модального окна
-//    */
-//   protected _buttonClose: HTMLButtonElement;
+  /** Кнопка закрытия модального окна */
+  _buttonClose: HTMLButtonElement;
 
-//   constructor(
-//     _body: HTMLElement,
-//     _modal: HTMLElement,
-//     _data: string,
-//     events: EventEmitter,
-//   ) {
-//     this._body = _body;
-//     this._modal = _modal;
-//     this._data = _data;
-//     this.events = events;
-//     this._modalContent = this._modal.querySelector('.modal__content');
-//     this._buttonClose = this._modal.querySelector('.modal__close');
-//   }
+  constructor(
+    _modal: HTMLElement,
+    _class: string,
+    events: EventEmitter,
+  ) {
+    super(_modal);
 
-//   /**
-//    * Открые модального окна
-//    */
-//   openModal() {
-//     this._modalContent.innerHTML = '';
+    this._modal = _modal;
+    this._class = _class;
+    this.events = events;
+    this._modalContent = this._modal.querySelector('.modal__content');
+    this._buttonClose = this._modal.querySelector('.modal__close');
+  }
 
-//     this._modal.classList.add(`${this._data}`);
-//     this._modal.style.position = 'fixed';
-//     this._body.style.overflow = 'hidden';
-//     this.events.emit('close:modal:keydown:esc:set');
-//     this.events.emit('close:modal:click:set');
-//   }
+  /** Открые модального окна */
+  setClassOpenModal() {
+    super.toggleClass(this.Modal, this._class)
+  }
 
-//   /**
-//    * Закрытие модального окна
-//    */
-//   closeModal() {
-//     this._modal.classList.remove(`${this._data}`);
-//     this._modal.style.removeProperty('position');
-//     this._body.style.overflow = 'auto';
-//     this.events.emit('close:modal:keydown:esc:remove');
-//     this.events.emit('close:modal:click:remove');
-//   }
+  /** Фиксирование модального окна по центру экрана */
+  setFixedModalWindows() {
+    this._modal.style.position = 'fixed';
+  }
 
-//   /**
-//    * Элемент контента модального окна 
-//    */
-//   getModalContent(): HTMLElement {
-//     return this._modalContent;
-//   }
+  /** Удаление абсолютного позицианирования */
+  deleteFixedModalWindows() {
+    this._modal.style.removeProperty('position');
+  }
 
-//   /**
-//    * Кнопка закрытия модального окна
-//    */
-//   getButtonClose(): HTMLButtonElement {
-//     return this._buttonClose;
-//   }
+  /** Закрытие модального окна */
+  setClassCloseModal() {
+    super.toggleClass(this.Modal, this._class);
+  }
 
-//   /**
-//    * Модальное окно
-//    */
-//   getModal(): HTMLElement {
-//     return this._modal;
-//   }
+  /** Элемент контента модального окна */
+  get ModalContent(): HTMLElement {
+    return this._modalContent;
+  }
 
-//   /**
-//    * Очистка модального окна
-//    */
-//   clearModalContent() {
-//     this._modalContent.innerHTML = '';
-//   }
-// }
+  /** Кнопка закрытия модального окна */
+  get ButtonClose(): HTMLButtonElement {
+    return this._buttonClose;
+  }
 
-// /**
-//  * Класс оповещия о заверщение покупки 
-//  */
-// export class Success implements ISuccess {
-//   /**
-//    * Контейнер окна оповещия о заверщение покупки 
-//    */
-//   protected _container: HTMLElement;
-//   /**
-//    * Описание успешного выполнения заказа
-//    */
-//   protected _orderSuccessDescription: HTMLElement;
-//   /**
-//    * Кнопка закрытия окна
-//    */
-//   protected orderSuccessClose: HTMLButtonElement;
+  /** Модальное окно */
+  get Modal(): HTMLElement {
+    return this._modal;
+  }
 
-//   constructor(
-//     container: HTMLElement,
-//     basket: Basket,
-//     modal: ModalWindows
-//   ) {
-//     this._container = container;
-    
-//     this._orderSuccessDescription = this._container.querySelector('.order-success__description');
-//     this.orderSuccessClose = this._container.querySelector('.order-success__close');
+  /** Очистка модального окна */
+  clearModalContent() {
+    this._modalContent.innerHTML = '';
+  }
+}
 
-//     this._orderSuccessDescription.textContent = `${basket.getPriceAll()} синапсов`;
-//     this.orderSuccessClose.addEventListener('click', () => modal.closeModal());
-//   }
+export class ModalWindows extends ModalElement implements IModalWindows {
+  constructor(
+    _modal: HTMLElement,
+    _class: string,
+    events: EventEmitter,
+  ) {
+    super(_modal, _class, events);
+  }
 
-//   /**
-//    * Контейнер окна оповещия о заверщение покупки
-//    */
-//   getSuccess() {
-//     return this._container;
-//   }
-// }
+  openModal(): void {
+    this.events.emit('open:modal')
+  }
+
+  closeModal(): void {
+    this.events.emit('close:modal')
+  }
+
+}
+
+/** Класс оповещия о заверщение покупки */
+export class Success implements ISuccess {
+  /** Контейнер окна оповещия о заверщение покупки */
+  container: HTMLElement;
+
+  /** Описание успешного выполнения заказа */
+  orderSuccessDescription: HTMLElement;
+
+  /** Кнопка закрытия окна */
+  orderSuccessClose: HTMLButtonElement;
+
+  constructor(
+    container: HTMLElement,
+    modal: IModalWindows,
+  ) {
+    this.container = container;
+
+    this.orderSuccessDescription = this.container.querySelector('.order-success__description');
+    this.orderSuccessClose = this.container.querySelector('.order-success__close');
+
+    this.orderSuccessClose.addEventListener('click', () => modal.closeModal());
+  }
+
+  /** Контейнер окна оповещия о заверщение покупки */
+  getSuccess() {
+    return this.container;
+  }
+
+  /** Установить стоимость заказа */
+  set price(value: number) {
+    this.orderSuccessDescription.textContent = `${value.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, " ")} синапсов`;
+  }
+}

@@ -1,54 +1,77 @@
-import { ICustomerInformation } from "./Data";
+import { Component } from "../components/base/Component";
 
-/**
- * Класс формы
- */
-export interface IForm {
-  /**
-   * Массив валидации формы
-   */
+export interface IForm extends Component<IForm> {
+  /** Форма */
+  _forms: HTMLFormElement;
+
+  /** Кнопка отправки формы */
+  _buttonSubmit: HTMLButtonElement;
+
+  /** Контейнер ошибок формы */
+  _errorContainer: HTMLElement;
+
+  /** Массив валидации формы */
   formValid: IFormValid;
 
-  /**
-   * Массив ошибок формы
-   */
-  readonly _errorMessage: IErrorMessage
+  /** Установить сообщение ошибки */
+  set showErrorMessage(values: string[])
 
-  /**
-   * Вывод ошибок формы
-   */
-  getErrorMessage(value1: string, value2: string): string
+  /** Получить все инпуты формы */
+  get InputForm(): NodeListOf<HTMLInputElement> 
 
-  /**
-   * Получить все инпуты формы
-   */
-  getInputForm(): NodeListOf<HTMLInputElement>
+  /** Валидация инпутов */
+  ValidationInput(el: boolean, mass: string): boolean
 
-  /**
-   * Валидация инпутов
-   */
-  getValidationInput(el: boolean, mass: string): boolean
-  
+  /** Отключение кнопки формы */
+  getDisablesButton(bool1: boolean, bool2: boolean): void
 
-  /**
-   * Отключение кнопки формы
-   */
-  getDisablesButton(bool1: boolean, bool2: boolean): boolean
+  /** Валидация кнопак оплаты */
+  get buttonPayment(): NodeListOf<Element>
 
-  /**
-   * Валидация кнопак оплаты
-   */
-  validButtonPayment(info: ICustomerInformation): void
+  /** Форма */
+  getForm(): HTMLFormElement
 
-  /**
-   * Форма
-   */
-  getForm(): HTMLElement
-
-  /**
-   * Кнопка
-   */
+  /** Кнопка */
   getButtonSubmit(): HTMLButtonElement
+
+  /** Очистка валидации вормы */
+  deleteInfoFormValid(): void
+}
+
+/** Класс формы ордер */
+export interface IFormOrder extends IForm {
+  /** Массив данных формы */
+  OrderInfo: IOrderInfo
+
+  /** Валидация кнопок оплаты */
+  validButtonPayment(): void
+
+  /** Валидация инпутов формы */
+  validInput(): void
+
+  /** Получение информации формы */
+  get InfoOrder(): IOrderInfo 
+
+  /** Очистка информации формы */
+  clearValidForm(): void
+}
+
+/** Класс формы контактов */
+export interface IFormContact extends IForm {
+  /** Массив данных формы */
+  FormsInfo: IFormsInfo
+
+ /** Валидация инпутов формы */
+  validInput(): void
+
+  /** Установка информации в массив формы */
+  setInfo(info: string, value: string): void
+
+  /** Получить массив формы */
+  get InfoContacts(): IFormsInfo
+
+  /** Очистить массив формы */
+  clearValidForm(): void
 }
 
 export interface IFormValid  {
@@ -63,5 +86,15 @@ export interface IErrorMessage  {
   'address': string;
   'email': string;
   'phone': string;
+  'NotFound': string;
 }
 
+export interface IOrderInfo {
+  'formOfPayment': string;
+  'address': string;
+}
+
+export interface IFormsInfo {
+  'phone': string;
+  'email': string;
+}

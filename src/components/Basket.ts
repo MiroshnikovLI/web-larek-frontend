@@ -1,124 +1,118 @@
-// import { IBasket } from "../types/Basket";
-// import { IProduct } from "../types/Product";
-// import { Pattern } from "./Pattern";
-// import { Product } from "./Product";
+import { IBasket, IBasketData, IBasketElement } from "../types/Basket";
+import { IProduct } from "../types/Product";
+import { ensureElement } from "../utils/utils";
+import { Component } from "./base/Component";
+import { EventEmitter } from "./base/events";
+import { Model } from "./base/model";
 
-// /**
-//  * Класс корзины
-//  */
-// export class Basket extends Pattern implements IBasket {
-//   /**
-//    * Массив продуктов
-//    */
-//   protected _product: IProduct[] = [];
-//   /**
-//    * Корзина
-//    */
-//   protected _basket: HTMLElement;
-//   /**
-//    * Элемент списка корзины
-//    */
-//   protected _basketList: HTMLElement;
-//   /**
-//    * Кнопка в корзине
-//    */
-//   protected _basketButton: HTMLButtonElement;
-//   /**
-//    * Элемент цены корзины
-//    */
-//   protected _basketPrice: HTMLElement;
+abstract class BasketElement extends Component<IBasketElement> implements IBasketElement {
+  /** Корзина */
+  basket: HTMLElement;
 
-//   constructor(
-//     _basket: HTMLElement
-//   ) {
-//     super();
-//     this._basket = _basket;
+  /** Элемент списка корзины */
+  basketList: HTMLElement;
 
-//     this._basketList = this._basket.querySelector('.basket__list');
-//     this._basketButton = this._basket.querySelector('.basket__button');
-//     this._basketPrice = this._basket.querySelector('.basket__price');
-//   }
+  /** Кнопка в корзине */
+  basketButton: HTMLButtonElement;
 
-//   /**
-//    * Добавления продукта в корзину
-//    */
-//   setProductBasket(product: Product) { 
-//     if(!this._product.includes(product)) {
-//         this._product.push(product);
-//     }
-//   }
+  /** Элемент цены корзины */
+  basketPrice: HTMLElement;
 
-//   /**
-//    * Удаление продукта из корзины
-//    */
-//   deleteProduct(product: Product) {
-//     this._product = this._product.filter(x => { return x.id != product.id});
-//   }
+  /** Емитер */
+  events: EventEmitter;
 
-//   /**
-//    * Удалить все продукты с корзины
-//    */
-//   deleteAllProduct() {
-//     this._product.length = 0;
-//   }
+  constructor(
+    container: HTMLElement,
+    events: EventEmitter,
+  ) {
+    super(container)
 
-//   /**
-//    * Получить количество товара в корзине
-//    */
-//   getLengthProduct(): number {
-//     return this._product.length;
-//   }
+    this.basket = container;
+  
+    this.basketList = ensureElement('.basket__list', this.basket);
+    this.basketPrice = ensureElement('.basket__price', this.basket);
+    this.basketButton = ensureElement<HTMLButtonElement>('.basket__button', this.basket);
 
-//   /**
-//    * Получить полный список покупок
-//    */
-//   getAllProduct(): IProduct[] {
-//     return this._product;
-//   }
+  }
 
-//   /**
-//    * Получить полную сумму корзины
-//    */
-//   getPriceAll() {
-//     let sum = 0;
-//     const red = this._product.map(g => g.price += sum);
-//     const numbers = red;
-//     const sumOfNumbers = numbers.reduce((acc, number) => acc + number, 0);
-//     return this.getPatterPraci(`${sumOfNumbers}`); 
-//   }
+  /** Получить список корзины */
+  get getList(): HTMLElement {
+    return this.basketList;
+  }
 
-//   /**
-//    * Получить лист корзины
-//    */
-//   getBasketList(){
-//     return this._basketList;
-//   }
+  /** Очистить лист товаров корзины */
+  clearBasketList() {
+    this.basketList.innerHTML = '';
+  }
+}
 
-//   /**
-//    * Получить кнопку корзины
-//    */
-//   getBasketButton() {
-//     return this._basketButton;
-//   }
+export class Basket extends BasketElement implements IBasket {
+  constructor(
+    container: HTMLElement,
+    events: EventEmitter,
+  ) {
+    super(container, events);
 
-//   /**
-//    * Получить Элемент цены корзины 
-//    */
-//   getPriceBasket() {
-//     return this._basketPrice;
-//   }
+    this.basketButton.addEventListener('click', () => {
+      events.emit('click:form:order');
+    })
+  }
 
-//   /**
-//    * Получить корзину
-//    */
-//   getBasket() {
-//     return this._basket;
-//   }
+  convertToPriceString(value: number): string {
+    return `${value.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, " ")} синапсов`;
+  }
+}
 
-//   /**
-//    * Очиста листа покупок
-//    */
-//   clearBasketList() {
-//     this._basketList.innerHTML = '';
-//   }
-// }
+export class BasketData extends Model<IProduct> implements IBasketData {
+  /** Массив продуктов */
+  basketItems: IProduct[] = []; // Переименовать
+
+  /** Добавления продукта в корзину */
+  set addProductBasket(product: IProduct) {
+    if (!this.basketItems.includes(product)) {
+      this.basketItems.push(product);
+    }
+    super.emitChanges('counter:basket');
+  }
+
+  /** Удалить все продукты с корзины */
+  deleteAllProducts() {
+    this.basketItems.length = 0;
+  }
+
+  /** Получить количество товара в корзине */
+  get ProductsQuantity(): number {
+    return this.basketItems.length;
+  }
+
+  /** Получить полный список покупок */
+  get AllProducts(): IProduct[] {
+    return this.basketItems;
+  }
+
+  /** Получить полную сумму корзины */
+  get TotalPrice(): number {
+    let sum = 0;
+    const red = this.basketItems.map(g => g.price += sum);
+    const numbers = red;
+    const sumOfNumbers = numbers.reduce((acc, number) => acc + number, 0);
+    return sumOfNumbers
+  }
+
+  /** Удаление продукта с корзины */
+  deleteProduct(product: IProduct) {
+    this.basketItems = this.basketItems.filter(x => { return x.id != product.id });
+    super.emitChanges('counter:basket');
+    super.emitChanges('click:basket')
+    super.emitChanges('render:basket:list')
+  }
+
+  /** Получение полного списка ID товара для отправки на сервер */
+  get allIdProducts(): string[] {
+    const allIdProducts: string [] = [];
+    this.AllProducts.forEach(el => (
+      allIdProducts.push(el.id)
+    ))
+    return allIdProducts;
+  }
+}

@@ -1,68 +1,53 @@
 export interface IBodyHtmlElement {
-  /**
-   * Body
-   */
+  /** Body */
   body: HTMLElement;
-  /**
-   * Модальное окно
-   */
+
+  /** Модальное окно */
   modal: HTMLElement;
-  /**
-   * Контент модального окна
-   */
+
+  /** Контент модального окна */
   modalContent: HTMLElement;
-  /**
-   * Кнопка закрытия модального окна
-   */
-  buttonModalClose: HTMLElement;
-  /**
-   * Элемент галерее страницы
-   */
+
+  /** Элемент галерее страницы */
   gallery: HTMLElement;
-  /**
-   * Кнопка корзины
-   */
+  
+  /** Кнопка корзины */
   buttonBasket: HTMLElement;
-  /**
-   * Счетчик корзины
-   */
+
+  /** Счетчик корзины */
   basketCounter: HTMLElement;
-  /**
-   * Темплейт каталога карточек на главной страницы
-   */
+
+  /** Темплейт каталога карточек на главной страницы */
   cardCatalogTemplate: HTMLTemplateElement;
-  /**
-   * Темплейт показание товара
-   */
+
+  /** Темплейт каталога товара */
   cardPreviewTemplate: HTMLTemplateElement;
-  /**
-   * Темплейт товара в корзине
-   */
+
+  /** Темплейт товара в корзине */
   cardBasketTemplate: HTMLTemplateElement;
-  /**
-   * Таплейт корзины
-   */
+
+  /** Таплейт корзины */
   basketTemplate: HTMLTemplateElement;
-  /**
-   * Теплейт формы оплаты
-   */
+
+  /** Теплейт формы оплаты */
   orderTemplate: HTMLTemplateElement;
-  /**
-   * Темлейт формы контакт
-   */
+
+  /** Темлейт формы контакт */
   contactsTemplate: HTMLTemplateElement;
-  /**
-   * Темплейт уведомление о завершение покупки
-   */
+
+  /** Темплейт уведомление о завершение покупки */
   successTemplate: HTMLTemplateElement;
+
 }
-/**
- * Классс страницы
- */
+
 export interface IPage extends IBodyHtmlElement {
-  /**
-   * Body
-   */
+  /** Body */
   body: HTMLElement;
+
+  /** Заблокировать прокрутку страницы */
+  disablePageScroll(): void
+
+  /** Установить прокутку страницы */
+  enablePageScroll(): void
 }
 
