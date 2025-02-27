@@ -40,17 +40,15 @@ export interface IForm extends Component<IForm> {
 
 /** Класс формы ордер */
 export interface IFormOrder extends IForm {
-  /** Массив данных формы */
-  OrderInfo: IOrderInfo
 
   /** Валидация кнопок оплаты */
   validButtonPayment(): void
 
+  /** Установка информации в массив формы */
+  setInfo(info: string, value: string): void
+
   /** Валидация инпутов формы */
   validInput(): void
-
-  /** Получение информации формы */
-  get InfoOrder(): IOrderInfo 
 
   /** Очистка информации формы */
   clearValidForm(): void
@@ -58,17 +56,12 @@ export interface IFormOrder extends IForm {
 
 /** Класс формы контактов */
 export interface IFormContact extends IForm {
-  /** Массив данных формы */
-  FormsInfo: IFormsInfo
 
  /** Валидация инпутов формы */
   validInput(): void
 
   /** Установка информации в массив формы */
   setInfo(info: string, value: string): void
-
-  /** Получить массив формы */
-  get InfoContacts(): IFormsInfo
 
   /** Очистить массив формы */
   clearValidForm(): void

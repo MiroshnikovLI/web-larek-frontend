@@ -10,9 +10,23 @@ export const settings: Isettings = {
     'email': 'Введите Email',
     'phone': 'Введите телефон',
     'NotFound': 'Ошибка соединение с сервером, попробуйте перезагрузить страницу',
-  }
+  },
+  array: {
+    payment: '',
+    address: '',
+    email: '',
+    phone: '',
+  } 
 };
 
 interface Isettings {
   errorMessage: IErrorMessage;
+  array: IArray;
+}
+
+interface IArray {
+  payment: string,
+  address: string,
+  email: string,
+  phone: string,
 }

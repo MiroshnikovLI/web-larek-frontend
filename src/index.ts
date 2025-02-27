@@ -1,5 +1,5 @@
 import './scss/styles.scss';
-import { API_URL, } from './utils/constants';
+import { API_URL, settings, } from './utils/constants';
 import { Api, } from './components/base/api';
 import { IAPIresponse, } from './types';
 import { ModalWindows, Success } from './components/Modal';
@@ -174,17 +174,21 @@ events.on('click:form:order', () => {
 events.on('click:form:content', () => {
   modal.clearModalContent();
 
-  modal.ModalContent.append(contacts.render())
+  modal.ModalContent.append(contacts.render());
+})
+
+// Сохранение данных в ордер
+events.on('seve:info:order', () => {
+  order.payment = settings.array.payment;
+  order.addres = settings.array.address;
+  order.email = settings.array.email;
+  order.phone = settings.array.phone;
+  order.items = cartData.allIdProducts;
+  order.total = cartData.TotalPrice;
 })
 
 // Отправка двнных на сервер
 events.on('send:info:server', () => {
-  order.payment = orderForm.InfoOrder.formOfPayment;
-  order.addres = orderForm.InfoOrder.address;
-  order.email = contacts.InfoContacts.email;
-  order.phone = contacts.InfoContacts.phone;
-  order.items = cartData.allIdProducts;
-  order.total = cartData.TotalPrice;
 
   contentApi.post('/order', order.оrderArray)
     .then(() => {
@@ -193,7 +197,7 @@ events.on('send:info:server', () => {
       modal.ModalContent.append(success.getSuccess());
       events.emit('dalete:info');
     })
-    .catch((error) => contacts.showErrorMessage = ([`${error}`]))
+    .catch((error) => contacts.showErrorMessage = ([`${error}`]) )
 })
 
 // Очистка форм и информации
@@ -203,4 +207,10 @@ events.on('dalete:info', () => {
   orderForm.clearValidForm();
   contacts.clearValidForm();
   events.emit('counter:basket');
+  settings.array = {
+    payment: '',
+    address: '',
+    email: '',
+    phone: '',
+  }
 })

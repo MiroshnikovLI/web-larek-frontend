@@ -5,7 +5,7 @@ import { Component } from "./base/Component";
 import { EventEmitter } from "./base/events";
 
 /** Класс формы */
-abstract class Form extends Component<IForm> implements IForm{
+abstract class Form extends Component<IForm> implements IForm {
   /** Форма */
   _forms: HTMLFormElement;
 
@@ -103,12 +103,6 @@ abstract class Form extends Component<IForm> implements IForm{
 
 /** Класс формы ордер */
 export class FormOrder extends Form implements IFormOrder {
-  /** Массив данных формы */
-  OrderInfo: IOrderInfo = {
-    'formOfPayment': '',
-    'address': '',
-  }
-
   constructor(
     form: HTMLFormElement,
     events: EventEmitter,
@@ -131,9 +125,16 @@ export class FormOrder extends Form implements IFormOrder {
         this.formValid.formOfPayment = true;
         this.showErrorMessage = (['formOfPayment', 'address']);
         this.getDisablesButton(this.formValid.address, this.formValid.formOfPayment);
-        this.OrderInfo.formOfPayment = ele.getAttribute('name');
+        this.setInfo('payment', ele.getAttribute('name'));
       })
     })
+  }
+
+  /** Установка информации в массив формы */
+  setInfo(info: string, value: string): void {
+    if (info) {
+      settings.array[info as keyof typeof settings.array] = value;
+    }
   }
 
   /** Валидация инпутов формы */
@@ -143,14 +144,9 @@ export class FormOrder extends Form implements IFormOrder {
         this.ValidationInput((ele.value.length > 0), ele.name);
         this.showErrorMessage = (['formOfPayment', 'address']);
         this.getDisablesButton(this.formValid.address, this.formValid.formOfPayment);
-        this.OrderInfo.address = ele.value;
+        this.setInfo('address', ele.value);
       })
     })
-  }
-
-  /** Получение информации формы */
-  get InfoOrder(): IOrderInfo {
-    return this.OrderInfo
   }
 
   /** Очистка информации формы */
@@ -162,22 +158,13 @@ export class FormOrder extends Form implements IFormOrder {
     this.buttonPayment.forEach(le => {
       le.classList.remove('button_alt-active');
     })
-    this.OrderInfo = {
-      'formOfPayment': '',
-      'address': '',
-    }
+
     this.setDisabled(this.getButtonSubmit(), true)
   }
 }
 
 /** Класс формы контактов */
 export class FormContact extends Form implements IFormContact {
-  /** Массив данных формы */
-  FormsInfo: IFormsInfo = {
-    'phone': '',
-    'email': ''
-  }
-
   constructor(
     form: HTMLFormElement,
     events: EventEmitter
@@ -186,18 +173,19 @@ export class FormContact extends Form implements IFormContact {
 
     this.validInput();
     this.getButtonSubmit().addEventListener('click', () => {
+      events.emit('seve:info:order');
       events.emit('send:info:server');
     })
   }
 
- /** Валидация инпутов формы */
+  /** Валидация инпутов формы */
   validInput() {
     this.InputForm.forEach(element => {
       element.addEventListener('input', () => {
+        this.setInfo(element.name, element.value);
         this.ValidationInput((element.value.length > 0), element.name);
         this.showErrorMessage = (['phone', 'email']);
         this.getDisablesButton(this.formValid.phone, this.formValid.email);
-        this.setInfo(element.name, element.value);
       })
     });
   }
@@ -205,13 +193,8 @@ export class FormContact extends Form implements IFormContact {
   /** Установка информации в массив формы */
   setInfo(info: string, value: string): void {
     if (info) {
-      this.FormsInfo[info as keyof typeof this.FormsInfo] = value;
+      settings.array[info as keyof typeof settings.array] = value;
     }
-  }
-
-  /** Получить массив формы */
-  get InfoContacts(): IFormsInfo {
-    return this.FormsInfo;
   }
 
   /** Очистить массив формы */
@@ -219,10 +202,7 @@ export class FormContact extends Form implements IFormContact {
     this.InputForm.forEach(ele => {
       ele.value = '';
     })
-    this.FormsInfo = {
-      'phone': '',
-      'email': ''
-    }
+
     this.setDisabled(this.getButtonSubmit(), true)
   }
 }

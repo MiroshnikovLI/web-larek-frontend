@@ -641,6 +641,9 @@ close:modal:click:remove
 // Отправка двнных на сервер  
 'send:info:server'
 
+// Сохранение данных в ордер  
+'seve:info:order'
+
 // Очистка форм и информации  
 'dalete:info'
 
