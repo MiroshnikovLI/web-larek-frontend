@@ -1,5 +1,4 @@
 import { EventEmitter } from "../components/base/events";
-import { Model } from "../components/base/model";
 import { IProduct } from "./Product";
 
 export interface IBasketElement {
@@ -12,25 +11,28 @@ export interface IBasketElement {
   /** Кнопка в корзине */
   basketButton: HTMLButtonElement;
 
+  /** Кнопка корзины на главном экране */
+  basketButtonBody: HTMLButtonElement;
+
   /** Элемент цены корзины */
   basketPrice: HTMLElement;
 
-  /** Емитер */
-  events: EventEmitter;
-
   /** Получить список корзины */
-  get getList(): HTMLElement 
+  get getList(): HTMLElement
 
   /** Очистить лист товаров корзины */
   clearBasketList(): void
 }
 
-export interface IBasket extends IBasketElement {
-  /** Отображение полной стоимости корзины */
-  convertToPriceString(value: number): string
+export interface IBasket {
+  /** Показать список корзины */
+  set items(items: HTMLElement[])
+
+  /** Получить общую стоимость корзины  */
+  convertToPriceString(value: number): string 
 }
 
-export interface IBasketData extends Model<IProduct> {
+export interface IBasketData  {
   /** Массив продуктов */
   basketItems: IProduct[]
 
@@ -41,13 +43,13 @@ export interface IBasketData extends Model<IProduct> {
   deleteAllProducts(): void
 
   /** Получить количество товара в корзине */
-  get ProductsQuantity(): number
+  get productsQuantity(): number
 
   /** Получить полный список покупок */
-  get AllProducts(): IProduct[]
+  get allProducts(): IProduct[]
 
   /** Получить полную сумму корзины */
-  get TotalPrice(): number
+  get totalPrice(): number
 
   /** Удаление продукта с корзины */
   deleteProduct(product: IProduct): void

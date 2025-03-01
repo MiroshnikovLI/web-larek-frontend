@@ -21,7 +21,7 @@ export interface IOrder {
   set total(count: number)
 
   /** Установить адрес */
-  set addres(ShippingAddress: string)
+  set addres(shippingAddress: string)
 
   /** Установить Email */
   set email(email: string)

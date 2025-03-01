@@ -1,7 +1,6 @@
-import { Component } from "../components/base/Component";
 import { EventEmitter } from "../components/base/events";
 
-export interface IModalElement extends Component<IModalElement> {
+export interface IModalElement {
   /** Контейнер модального окна */
   _modal: HTMLElement;
 
@@ -11,47 +10,40 @@ export interface IModalElement extends Component<IModalElement> {
   /** Класс открытия модального окна */
   _class: string;
 
-  /** Класс емитера */
-  events: EventEmitter;
-
   /** Кнопка закрытия модального окна */
   _buttonClose: HTMLButtonElement;
-
-  /** Открые модального окна */
-  setClassOpenModal(): void
-
+  
   /** Фиксирование модального окна по центру экрана */
   setFixedModalWindows(): void
 
   /** Удаление абсолютного позицианирования */
   deleteFixedModalWindows(): void
 
-  /** Закрытие модального окна */
-  setClassCloseModal(): void
-
-
   /** Элемент контента модального окна */
-  get ModalContent(): HTMLElement 
+  get modalContent(): HTMLElement
 
   /** Кнопка закрытия модального окна */
-  get ButtonClose(): HTMLButtonElement
+  get buttonClose(): HTMLButtonElement
 
   /** Модальное окно */
-  get Modal(): HTMLElement
+  get modal(): HTMLElement
 
   /** Очистка модального окна */
   clearModalContent(): void
 }
 
-export interface IModalWindows extends IModalElement {
+export interface IModalWindows {
+  /** Емитор */
+  events: EventEmitter;
+  
+  /** Открыть модальное окно */
+  openModal(): void
 
-  openModal(): void 
-
+  /** Закрыть модальное окно */
   closeModal(): void
-
 }
 
-export interface ISuccess  {
+export interface ISuccess {
   /** Контейнер окна оповещия о заверщение покупки */
   container: HTMLElement;
 
@@ -61,8 +53,11 @@ export interface ISuccess  {
   /** Кнопка закрытия окна */
   orderSuccessClose: HTMLButtonElement;
 
+  /** Емитер */
+  events: EventEmitter;
+
   /** Контейнер окна оповещия о заверщение покупки */
-  getSuccess(): void
+  getSuccess(): HTMLElement
 
   /** Установить стоимость заказа */
   set price(value: number)

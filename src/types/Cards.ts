@@ -1,8 +1,5 @@
-import { Component } from "../components/base/Component";
-import { IProduct } from "./Product";
-
 /** Класс Элементов карточки */
-export interface ICardsElements extends Component<ICardsElements> {
+export interface IBaseCard {
   /** Карточка */
   _card: HTMLElement;
 
@@ -28,20 +25,29 @@ export interface ICardsElements extends Component<ICardsElements> {
   readonly massCotegory: ImassCotegory
 
   /** Установить изображение */
-  set imgValue(product: IProduct)
+  set imgValue(value: string)
 
   /** Установить цену продукта */
-  set priceValue(product: IProduct)
+  set priceValue(value: number | null)
 
-  /** Установить категорию продукта */
-  set cotegoryValue(product: IProduct)
+  /** Установить класс категории продукта */
+  set cotegoryClass(className: string)
+
+  /** Установить текс котегории продукта */
+  set cotegoryValie(value: string)
 
   /** Установить заголовок продукта */
-  set titleValue(product: IProduct)
+  set titleValue(value: string)
 
   /** Установить описание продукта */
-  set textValue(product: IProduct)
+  set textValue(value: string)
 }
+
+export interface ICardBasket {
+  /** Установить порядковыый номер товара в корзине */
+  set basketIntex(value: number)
+}
+
 
 export interface ImassCotegory {
   'софт-скил': string;

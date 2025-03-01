@@ -1,13 +1,11 @@
-import { ICardsElements, ImassCotegory } from "../types/Cards";
-import { IProduct } from "../types/Product";
+import { IMouseClick } from "../types";
+import { IBaseCard, ICardBasket, ImassCotegory } from "../types/Cards";
 import { CDN_URL } from "../utils/constants";
 import { ensureElement } from "../utils/utils";
 import { Component } from "./base/Component";
-import { EventEmitter } from "./base/events";
-import { BasketData } from "./Basket";
 
 /** Класс Элементов карточки */
-export abstract class CardsElements extends Component<ICardsElements> implements ICardsElements {
+export abstract class BaseCard extends Component<IBaseCard> {
   /** Карточка */
   _card: HTMLElement;
 
@@ -53,105 +51,83 @@ export abstract class CardsElements extends Component<ICardsElements> implements
   }
 
   /** Установить изображение */
-  set imgValue(product: IProduct) {
-    this._image.src = `${CDN_URL + product.image}`
+  set imgValue(value: string) {
+    // this._image.src = `${CDN_URL + value}`
+    super.setImage(this._image, `${CDN_URL + value}`)
   }
 
   /** Установить цену продукта */
-  set priceValue(product: IProduct) {
-    if (product.price === null) {
-      this._price.textContent = `Бесценно`;
-    } else {
-      this._price.textContent = `${product.price.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, " ")}` + ' синапсов';
-    }
+  set priceValue(value: number | null) {
+    const val = value === null ? 'Бесценно' : `${value.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, " ")}` + ' синапсов';
+    super.setText(this._price, val)
   }
 
-  /** Установить категорию продукта */
-  set cotegoryValue(product: IProduct) {
-    this._cotegory.classList.add(this.massCotegory[product.category as keyof typeof this.massCotegory]);
-    this._cotegory.textContent = product.category
+  /** Установить класс категории продукта */
+  set cotegoryClass(className: string) {
+    super.toggleClass(this._cotegory, this.massCotegory[className as keyof typeof this.massCotegory]);
   }
+
+  /** Установить текс котегории продукта */
+  set cotegoryValie(value: string) {
+    super.setText(this._cotegory, value)
+  } 
 
   /** Установить заголовок продукта */
-  set titleValue(product: IProduct) {
-    this._title.textContent = product.title
+  set titleValue(value: string) {
+    super.setText(this._title, value)
   }
 
   /** Установить описание продукта */
-  set textValue(product: IProduct) {
-    this._text.textContent = product.description
+  set textValue(value: string) {
+    super.setText(this._text, value)
   }
 }
 
 /** Класс каталога продуктов */
-export class CatologProduct extends CardsElements {
+export class CatologProduct extends BaseCard {
   constructor(
     _card: HTMLElement,
-    product: IProduct,
-    event: EventEmitter,
+    click?: IMouseClick,
   ) {
     super(_card);
-
-    this.imgValue = product;
-    this.priceValue = product;
-    this.cotegoryValue = product;
-    this.titleValue = product;
-
-    this._card.addEventListener('click', () => event.emit('click:card:page', product))
+    this._card.addEventListener('click', click.onClick)
   }
 }
 
 /** Класс карточки продукта */
-export class Card extends CardsElements {
+export class Card extends BaseCard {
   constructor(
     card: HTMLElement,
-    product: IProduct,
-    basket: BasketData,
-    event: EventEmitter
+    disabled: boolean,
+    click?: IMouseClick,
   ) {
     super(card)
-
-    this.imgValue = product,
-    this.cotegoryValue = product,
-    this.titleValue = product,
-    this.textValue = product,
-    this.priceValue = product
-
-    if (product.price === null) {
-      super.setDisabled(this._button, true);
-    } else {
-      super.setDisabled(this._button, false);
-    }
     
-    if (basket.AllProducts.includes(Object(product))) {
-      super.setDisabled(this._button, true);
-    } else {
-      this._button.addEventListener('click', () => event.emit('click:add:basket', product))
-    }
+    if (disabled) super.setDisabled(this._button, true);
+    
+    this._button.addEventListener('click', click.onClick)
   }
 }
 
 /** Класс карточки продукта в корзине */
-export class CardBasket extends CardsElements {
+export class CardBasket extends BaseCard implements ICardBasket {
 
   protected _basketIndex: HTMLElement;
 
   constructor(
     card: HTMLElement,
-    product?: IProduct,
-    basket?: BasketData,
-    count?: number
+    click?: IMouseClick,
   ) {
     super(card)
 
-    this.priceValue = product,
-    this.titleValue = product
-
     this._basketIndex = this._card.querySelector('.basket__item-index');
 
-    this._basketIndex.textContent = `${count}`;
-    
-    this._button.addEventListener('click', () => basket.deleteProduct(product));
+    this._button.addEventListener('click', click.onClick);
+
   }
   
+  /** Установить порядковыый номер товара в корзине */
+  set basketIntex(value: number) {
+    super.setText(this._basketIndex, value)
+  }
 }

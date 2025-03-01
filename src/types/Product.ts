@@ -1,6 +1,6 @@
 import { EventEmitter } from "../components/base/events";
 
-export interface IProductApi {
+export interface IProductCardManager {
   /** Емитер */
   events: EventEmitter;
 
@@ -15,9 +15,6 @@ export interface IProductApi {
 
   /** Получить массив продуктов */
   getMassProduct(): IProduct[]
- 
-  /** Получить продукт по ID */
-  getOneProduct(product: IProduct): string
 
   /** Получить массив заказа */
   getToSendProduct(product: IProduct[], userInfo: IMassInfo): IOrderAmount

@@ -1,8 +1,8 @@
-import { IMassInfo, IOrderAmount, IProduct, IProductApi } from "../types/Product";
+import { IMassInfo, IOrderAmount, IProduct, IProductCardManager } from "../types/Product";
 import { EventEmitter } from "./base/events";
 
 /** Класс получающий карточки продукта */
-export class ProductApi implements IProductApi {
+export class ProductCardManager implements IProductCardManager {
   /** Емитер */
   events: EventEmitter;
 
@@ -26,14 +26,7 @@ export class ProductApi implements IProductApi {
 
   /** Получить массив продуктов */
   getMassProduct(): IProduct[] {
-    const massProduct: IProduct[] = this.massProduct;
-    return massProduct;
-  }
- 
-  /** Получить продукт по ID */
-  getOneProduct(product: IProduct): string {
-    const element = `${this.massProduct.includes(product)}`;
-    return element;
+    return this.massProduct;
   }
 
   /** Получить массив заказа */

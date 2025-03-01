@@ -1,70 +1,77 @@
-import { Component } from "../components/base/Component";
+import { EventEmitter } from "../components/base/events";
 
-export interface IForm extends Component<IForm> {
+export interface IForm {
   /** Форма */
-  _forms: HTMLFormElement;
+  forms: HTMLFormElement;
 
   /** Кнопка отправки формы */
-  _buttonSubmit: HTMLButtonElement;
+  buttonSubmit: HTMLButtonElement;
 
   /** Контейнер ошибок формы */
-  _errorContainer: HTMLElement;
+  errorContainer: HTMLElement;
+
+  /** Инпуты формы */
+  inputsForms: HTMLInputElement[];
+
+  /** Установить сообщение ошибки */
+  set showErrorMessage(values: string)
+
+  /** Отключение кнопки формы */
+  set getDisablesButton(bool: boolean)
+}
+
+export interface IFormOrder {
+  /** Класс активной кнопки */
+  className: string;
+
+  /** Кнопки оплаты */
+  paymentsButton: HTMLButtonElement[];
+
+  /** Получить информацию об оплате */
+  get paymentInfo(): string
+
+  /** Получить адресс доставки */
+  get addressInfo(): string
+
+  /** Очистить поля ввода формы */
+  clearInputValue(): void
+
+  /** Очистить информацию об оплате */
+  clearPayment(): void
+}
+
+export interface IFormContact {
+
+  /** Получить информацию полей Email и Phone */
+  get inputInfo(): IInputValue
+
+  /** Очистить поля формы */
+  clearInputValue(): void
+}
+
+export interface IValidForm {
+
+  /** Емитер */
+  events: EventEmitter;
 
   /** Массив валидации формы */
   formValid: IFormValid;
 
-  /** Установить сообщение ошибки */
-  set showErrorMessage(values: string[])
-
-  /** Получить все инпуты формы */
-  get InputForm(): NodeListOf<HTMLInputElement> 
-
-  /** Валидация инпутов */
-  ValidationInput(el: boolean, mass: string): boolean
-
-  /** Отключение кнопки формы */
-  getDisablesButton(bool1: boolean, bool2: boolean): void
-
-  /** Валидация кнопак оплаты */
-  get buttonPayment(): NodeListOf<Element>
-
-  /** Форма */
-  getForm(): HTMLFormElement
-
-  /** Кнопка */
-  getButtonSubmit(): HTMLButtonElement
-
-  /** Очистка валидации вормы */
-  deleteInfoFormValid(): void
-}
-
-/** Класс формы ордер */
-export interface IFormOrder extends IForm {
-
   /** Валидация кнопок оплаты */
-  validButtonPayment(): void
+  validButtonPayment(button: HTMLButtonElement[], className: string): void
 
-  /** Установка информации в массив формы */
-  setInfo(info: string, value: string): void
+  /** Валидация инпутов формы order */
+  validInputsOrder(inputs: HTMLInputElement[]): void
 
-  /** Валидация инпутов формы */
-  validInput(): void
+  /** Валидация инпутов формы contacts */
+  validInputsContact(inputs: HTMLInputElement[]): void
 
-  /** Очистка информации формы */
-  clearValidForm(): void
-}
 
-/** Класс формы контактов */
-export interface IFormContact extends IForm {
+  /** Установить сообщение ошибки */
+  showErrorMessage(values: string[]): void
 
- /** Валидация инпутов формы */
-  validInput(): void
-
-  /** Установка информации в массив формы */
-  setInfo(info: string, value: string): void
-
-  /** Очистить массив формы */
-  clearValidForm(): void
+  /** Очистить массив валидации */
+  clearFormValid(): void
 }
 
 export interface IFormValid  {
@@ -82,12 +89,7 @@ export interface IErrorMessage  {
   'NotFound': string;
 }
 
-export interface IOrderInfo {
-  'formOfPayment': string;
-  'address': string;
-}
-
-export interface IFormsInfo {
-  'phone': string;
-  'email': string;
+export interface IInputValue {
+  email: string;
+  phone: string;
 }

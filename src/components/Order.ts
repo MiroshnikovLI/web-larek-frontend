@@ -27,8 +27,8 @@ export class Order implements IOrder {
   }
 
   /** Установить адрес */
-  set addres(ShippingAddress: string) {
-    this.order.address = ShippingAddress;
+  set addres(shippingAddress: string) {
+    this.order.address = shippingAddress;
   }
 
   /** Установить Email */
@@ -41,12 +41,12 @@ export class Order implements IOrder {
     this.order.phone = phone;
   }
 
-  /** Получить массив информации */
+  /** Получить обьект информации о заказе */
   get оrderArray() {
     return this.order
   }
 
-  /** Очистить массив информации */
+  /** Очистить обьект информации о заказе */
   clearOrderArray() {
     this.order = {
       items: [],

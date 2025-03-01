@@ -16,7 +16,7 @@ export class BodyHtmlElement implements IBodyHtmlElement {
   gallery: HTMLElement;
   
   /** Кнопка корзины */
-  buttonBasket: HTMLElement;
+  buttonBasket: HTMLButtonElement;
 
   /** Счетчик корзины */
   basketCounter: HTMLElement;
@@ -49,7 +49,7 @@ export class BodyHtmlElement implements IBodyHtmlElement {
     this.modal = ensureElement<HTMLElement>('#modal-container', this.body);
     this.modalContent = ensureElement<HTMLElement>('.modal__content', this.modal);
     this.gallery = ensureElement<HTMLElement>('.gallery', this.body);
-    this.buttonBasket = ensureElement<HTMLElement>('.header__basket', this.body);
+    this.buttonBasket = ensureElement<HTMLButtonElement>('.header__basket', this.body);
     this.basketCounter = ensureElement<HTMLElement>('.header__basket-counter', this.body);
     this.cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card-catalog', this.body);
     this.cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#card-preview', this.body);
@@ -81,6 +81,11 @@ export class Page extends BodyHtmlElement implements IPage {
   /** Установить прокутку страницы */
   enablePageScroll() {
     this.body.style.overflow = 'auto';
+  }
+  
+  /** Установить счектчик корзины */
+  counterBasket(count: number) {
+    this.basketCounter.textContent = `${count}`
   }
 }
 

@@ -1,165 +1,101 @@
-import { IForm, IFormContact, IFormOrder, IFormsInfo, IFormValid, IOrderInfo } from "../types/Form";
-import { IPage } from "../types/Page";
+import { IMouseClick } from "../types";
+import { IForm, IFormContact, IFormOrder, IFormValid, IInputValue } from "../types/Form";
 import { settings } from "../utils/constants"
+import { ensureAllElements, ensureElement } from "../utils/utils";
 import { Component } from "./base/Component";
 import { EventEmitter } from "./base/events";
 
 /** Класс формы */
 abstract class Form extends Component<IForm> implements IForm {
   /** Форма */
-  _forms: HTMLFormElement;
+  forms: HTMLFormElement;
 
   /** Кнопка отправки формы */
-  _buttonSubmit: HTMLButtonElement;
+  buttonSubmit: HTMLButtonElement;
 
   /** Контейнер ошибок формы */
-  _errorContainer: HTMLElement;
+  errorContainer: HTMLElement;
 
-  /** Массив валидации формы */
-  formValid: IFormValid;
+  /** Инпуты формы */
+  inputsForms: HTMLInputElement[];
 
-  constructor(forms: HTMLFormElement) {
+  constructor(
+    forms: HTMLFormElement,
+  ) {
     super(forms)
 
-    this._forms = forms;
+    this.forms = forms;
 
-    this.formValid = {
-      'formOfPayment': false,
-      'address': false,
-      'email': false,
-      'phone': false,
-    };
-
-    this._errorContainer = this._forms.querySelector('.form__errors');
-    this._buttonSubmit = this._forms.querySelector('button[type=submit]');
-    this._buttonSubmit.addEventListener('click', evt => {
+    this.errorContainer = ensureElement('.form__errors', this.forms);
+    this.buttonSubmit = ensureElement<HTMLButtonElement>('button[type=submit]', this.forms);
+    this.inputsForms = ensureAllElements<HTMLInputElement>('.form__input', this.forms);
+    this.buttonSubmit.addEventListener('click', evt => {
       evt.preventDefault();
     });
   }
 
   /** Установить сообщение ошибки */
-  set showErrorMessage(values: string[]) {
-    const errors: string[] = [];
-    values.forEach(value => {
-      if (!(this.formValid[value as keyof typeof this.formValid])) {
-        errors.push(settings.errorMessage[value as keyof typeof settings.errorMessage])
-      }
-    })
-    this._errorContainer.textContent = errors.join(' ');
-  }
-
-  /** Получить все инпуты формы */
-  get InputForm(): NodeListOf<HTMLInputElement> {
-    const input = this._forms.querySelectorAll<HTMLInputElement>('.form__input');
-    return input;
-  }
-
-  /** Валидация инпутов */
-  ValidationInput(el: boolean, mass: string) {
-    if (el) {
-      this.formValid[mass as keyof typeof this.formValid] = true;
-      return true;
-    } else {
-      this.formValid[mass as keyof typeof this.formValid] = false;
-      return false;
-    }
+  set showErrorMessage(values: string) {
+    super.setText(this.errorContainer, values);
   }
 
   /** Отключение кнопки формы */
-  getDisablesButton(bool1: boolean, bool2: boolean) {
-    if (bool1 && bool2) {
-      return this._buttonSubmit.disabled = false;
-    } else {
-      return this._buttonSubmit.disabled = true;
-    }
-  }
-
-  /** Валидация кнопак оплаты */
-  get buttonPayment(): NodeListOf<Element> {
-    const buttonCard = this._forms.querySelectorAll('.button_alt');
-    return buttonCard;
-  }
-
-  /** Форма */
-  getForm() {
-    return this._forms;
-  }
-
-  /** Кнопка */
-  getButtonSubmit() {
-    return this._buttonSubmit;
-  }
-
-  /** Очистка валидации вормы */
-  deleteInfoFormValid() {
-    this.formValid = {
-      'formOfPayment': false,
-      'address': false,
-      'email': false,
-      'phone': false,
-    };
+  set getDisablesButton(bool: boolean) {
+    bool ? super.setDisabled(this.buttonSubmit, false) : super.setDisabled(this.buttonSubmit, true)
   }
 }
 
 /** Класс формы ордер */
 export class FormOrder extends Form implements IFormOrder {
+  /** Класс активной кнопки */
+  className: string;
+
+  /** Кнопки оплаты */
+  paymentsButton: HTMLButtonElement[];
+
   constructor(
     form: HTMLFormElement,
-    events: EventEmitter,
+    className: string,
+    click: IMouseClick,
   ) {
     super(form)
 
-    this.getButtonSubmit().addEventListener('click', () => {
-      events.emit('click:form:content');
+    this.className = className;
+    this.paymentsButton = ensureAllElements('.button_alt', this.forms);
+    this.buttonSubmit.addEventListener('click', click.onClick);
+
+  }
+
+  /** Получить информацию об оплате */
+  get paymentInfo(): string {
+    let pay: string;
+    this.paymentsButton.forEach(ele => {
+      ele.getAttribute('class').includes(this.className) ? pay = ele.getAttribute('name') : ''
     })
+    return pay;
   }
 
-  /** Валидация кнопок оплаты */
-  validButtonPayment() {
-    this.buttonPayment.forEach(ele => {
-      ele.addEventListener('click', () => {
-        this.buttonPayment.forEach(le => {
-          le.classList.remove('button_alt-active');
-        })
-        ele.classList.add('button_alt-active');
-        this.formValid.formOfPayment = true;
-        this.showErrorMessage = (['formOfPayment', 'address']);
-        this.getDisablesButton(this.formValid.address, this.formValid.formOfPayment);
-        this.setInfo('payment', ele.getAttribute('name'));
-      })
+  /** Получить адресс доставки */
+  get addressInfo(): string {
+    let address: string
+    this.inputsForms.forEach(ele => {
+      address = ele.value;
     })
+    return address;
   }
 
-  /** Установка информации в массив формы */
-  setInfo(info: string, value: string): void {
-    if (info) {
-      settings.array[info as keyof typeof settings.array] = value;
-    }
-  }
-
-  /** Валидация инпутов формы */
-  validInput() {
-    this.InputForm.forEach(ele => {
-      ele.addEventListener('input', () => {
-        this.ValidationInput((ele.value.length > 0), ele.name);
-        this.showErrorMessage = (['formOfPayment', 'address']);
-        this.getDisablesButton(this.formValid.address, this.formValid.formOfPayment);
-        this.setInfo('address', ele.value);
-      })
-    })
-  }
-
-  /** Очистка информации формы */
-  clearValidForm() {
-    this.InputForm.forEach(ele => {
+  /** Очистить поля ввода формы */
+  clearInputValue() {
+    this.inputsForms.forEach(ele => {
       ele.value = '';
     })
+  }
 
-    this.buttonPayment.forEach(le => {
-      le.classList.remove('button_alt-active');
+  /** Очистить информацию об оплате */
+  clearPayment() {
+    this.paymentsButton.forEach(le => {
+      le.classList.remove(this.className);
     })
-
-    this.setDisabled(this.getButtonSubmit(), true)
   }
 }
 
@@ -167,42 +103,105 @@ export class FormOrder extends Form implements IFormOrder {
 export class FormContact extends Form implements IFormContact {
   constructor(
     form: HTMLFormElement,
-    events: EventEmitter
+    click: IMouseClick,
   ) {
     super(form);
 
-    this.validInput();
-    this.getButtonSubmit().addEventListener('click', () => {
-      events.emit('seve:info:order');
-      events.emit('send:info:server');
-    })
+    this.buttonSubmit.addEventListener('click', click.onClick);
   }
 
-  /** Валидация инпутов формы */
-  validInput() {
-    this.InputForm.forEach(element => {
-      element.addEventListener('input', () => {
-        this.setInfo(element.name, element.value);
-        this.ValidationInput((element.value.length > 0), element.name);
-        this.showErrorMessage = (['phone', 'email']);
-        this.getDisablesButton(this.formValid.phone, this.formValid.email);
-      })
-    });
-  }
-
-  /** Установка информации в массив формы */
-  setInfo(info: string, value: string): void {
-    if (info) {
-      settings.array[info as keyof typeof settings.array] = value;
+  /** Получить информацию полей Email и Phone */
+  get inputInfo(): IInputValue {
+    let inputValue: IInputValue = {
+      email: '',
+      phone: ''
     }
+    this.inputsForms.forEach(ele => {
+      ele.name === 'email' ? inputValue.email = ele.value : '';
+      ele.name === 'phone' ? inputValue.phone = ele.value : '';
+    })
+    return inputValue;
   }
 
-  /** Очистить массив формы */
-  clearValidForm() {
-    this.InputForm.forEach(ele => {
+  /** Очистить поля формы */
+  clearInputValue() {
+    this.inputsForms.forEach(ele => {
       ele.value = '';
     })
+  }
+}
 
-    this.setDisabled(this.getButtonSubmit(), true)
+export class ValidForm {
+
+  /** Емитер */
+  events: EventEmitter;
+
+  /** Массив валидации формы */
+  formValid: IFormValid;
+
+  constructor(evens: EventEmitter) {
+    this.events = evens;
+    this.formValid = {
+      'formOfPayment': false,
+      'address': false,
+      'email': false,
+      'phone': false,
+    };
+  }
+
+  /** Валидация кнопок оплаты */
+  validButtonPayment(button: HTMLButtonElement[], className: string) {
+    button.forEach(ele => {
+      ele.addEventListener('click', () => {
+        button.forEach(le => {
+          le.classList.remove(className);
+        })
+        ele.classList.add(className);
+        this.formValid.formOfPayment = true;
+        this.events.emit('payment:valid')
+      })
+    })
+  }
+
+  /** Валидация инпутов формы order */
+  validInputsOrder(inputs: HTMLInputElement[]) {
+    inputs.forEach(ele => {
+      ele.addEventListener('input', () => {
+        ele.value.length > 0 ? this.formValid[ele.name as keyof typeof this.formValid] = true : this.formValid[ele.name as keyof typeof this.formValid] = false;
+        this.events.emit('input:valid:order')
+      })
+    })
+  }
+
+  /** Валидация инпутов формы contacts */
+  validInputsContact(inputs: HTMLInputElement[]) {
+    inputs.forEach(ele => {
+      ele.addEventListener('input', () => {
+        ele.value.length > 0 ? this.formValid[ele.name as keyof typeof this.formValid] = true : this.formValid[ele.name as keyof typeof this.formValid] = false;
+        this.events.emit('input:valid:contact')
+      })
+    })
+  }
+
+
+  /** Установить сообщение ошибки */
+  showErrorMessage(values: string[]) {
+    const errors: string[] = [];
+    values.forEach(value => {
+      if (!(this.formValid[value as keyof typeof this.formValid])) {
+        errors.push(settings.errorMessage[value as keyof typeof settings.errorMessage])
+      }
+    })
+    return errors.join(' ');
+  }
+
+  /** Очистить массив валидации */
+  clearFormValid() {
+    this.formValid = {
+      'formOfPayment': false,
+      'address': false,
+      'email': false,
+      'phone': false,
+    }
   }
 }

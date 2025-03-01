@@ -1,5 +1,5 @@
 import './scss/styles.scss';
-import { API_URL, settings, } from './utils/constants';
+import { API_URL, } from './utils/constants';
 import { Api, } from './components/base/api';
 import { IAPIresponse, } from './types';
 import { ModalWindows, Success } from './components/Modal';
@@ -7,11 +7,11 @@ import { CardBasket, Card, CatologProduct } from './components/Cards';
 import { Page } from './components/Page';
 import { EventEmitter } from './components/base/events';
 import { BasketData, Basket } from './components/Basket';
-import { ProductApi } from './components/Product';
-import { cloneTemplate } from './utils/utils';
-import { FormContact, FormOrder } from './components/Form';
+import { ProductCardManager } from './components/Product';
+import { cloneTemplate, } from './utils/utils';
 import { Order } from './components/Order';
 import { IProduct } from './types/Product';
+import { FormContact, FormOrder, ValidForm } from './components/Form';
 
 /** Подключение к серверу */
 const contentApi = new Api(API_URL);
@@ -20,93 +20,80 @@ const contentApi = new Api(API_URL);
 const events = new EventEmitter();
 
 /** Продукт */
-const product = new ProductApi(events);
+const product = new ProductCardManager(events);
 
 /** Элементы страницы */
 const pageContainers = new Page(document.querySelector('.page'));
 
 /** Данные корзины */
-const cartData = new BasketData({}, events);
+const basketData = new BasketData({}, events);
 
 /** Класс корзины */
-const basketQ = new Basket(cloneTemplate(pageContainers.basketTemplate), events);
+const basket = new Basket(cloneTemplate(pageContainers.basketTemplate), events, pageContainers.buttonBasket, {
+  onClick: () => {
+    modal.openModal();
+    events.emit('click:basket');
+    events.emit('render:basket:list');
+  }
+});
 
 /** Модальное окно */
 const modal = new ModalWindows(pageContainers.modal, 'modal_active', events)
 
 /** Форма ордер */
-const orderForm = new FormOrder(cloneTemplate(pageContainers.orderTemplate), events);
+const orderForm = new FormOrder(cloneTemplate(pageContainers.orderTemplate), 'button_alt-active', {
+  onClick: () => {
+    events.emit('click:form:content');
+    validSetting.clearFormValid();
+  }
+});
 
 /** Форма контакты */
-const contacts = new FormContact(cloneTemplate(pageContainers.contactsTemplate), events);
+const contacts = new FormContact(cloneTemplate(pageContainers.contactsTemplate), {
+  onClick: () => {
+    events.emit('seve:info:order');
+    events.emit('send:info:server');
+    validSetting.clearFormValid();
+  }
+});
+
+/** Класс валидации форм */
+const validSetting = new ValidForm(events)
 
 /** Модальное окно успешного завершания покупок */
-const success = new Success(cloneTemplate(pageContainers.successTemplate), modal);
+const success = new Success(cloneTemplate(pageContainers.successTemplate), {
+  onClick: () => modal.closeModal()
+});
 
 /** Класс order для отправки информации на сервер о заказе */
-const order = new Order()
+const order = new Order();
 
 /** Открытие модального окна */
 events.on('open:modal', () => {
-  modal.setClassOpenModal();
   modal.clearModalContent();
   modal.setFixedModalWindows();
   pageContainers.disablePageScroll();
-  events.emit('close:modal:keydown:esc:set');
-  events.emit('close:modal:click:set');
+  pageContainers.body.addEventListener('keydown', closeEsc)
 })
 
 /** Закрытие модального окна */
 events.on('close:modal', () => {
-  modal.setClassCloseModal();
   pageContainers.enablePageScroll();
   modal.deleteFixedModalWindows();
-  events.emit('close:modal:keydown:esc:remove');
-  events.emit('close:modal:click:remove');
+  pageContainers.body.removeEventListener('keydown', closeEsc)
 })
 
 /** Закрытие модального окна по кнопке ESC */
 const closeEsc = function (evt: KeyboardEvent) {
   if (evt.code === 'Escape') {
-    modal.setClassCloseModal();
+    modal.closeModal();
   }
 }
-
-events.on('close:modal:keydown:esc:set', () =>
-  pageContainers.body.addEventListener('keydown', closeEsc)
-);
-
-events.on('close:modal:keydown:esc:remove', () =>
-  pageContainers.body.removeEventListener('keydown', closeEsc)
-);
-
-/** Закрытие модального окна по клику вне модального окна */
-const closeKlick = function (evt: Event) {
-  const el = evt.target as HTMLElement;
-  if (el.id === 'modal-container') {
-    modal.setClassCloseModal();
-  }
-}
-
-events.on('close:modal:click:set', () =>
-  modal.Modal.addEventListener('click', closeKlick)
-);
-
-events.on('close:modal:click:remove', () =>
-  modal.Modal.removeEventListener('click', closeKlick)
-);
-
-// Закрытие модального окна по кнопке крестик
-modal.ButtonClose.addEventListener('click', () => modal.setClassCloseModal())
-
-// Кнопка корзины на главном экране
-pageContainers.buttonBasket.addEventListener('click', () => {
-  modal.openModal();
-  events.emit('click:basket');
-})
 
 // Счетчик корзины
-events.on('counter:basket', () => pageContainers.basketCounter.textContent = `${cartData.ProductsQuantity}`)
+events.on('counter:basket', () => {
+  pageContainers.counterBasket(basketData.productsQuantity)
+})
 
 // Получение массива продукта
 contentApi.get('/product')
@@ -115,102 +102,136 @@ contentApi.get('/product')
   })
   .catch((err) => console.log(err));
 
-
 // Отображение карточек 
 events.on('product:view', () => {
-  product.getMassProduct().forEach(el => {
-
-    const Catolog = new CatologProduct(cloneTemplate(pageContainers.cardCatalogTemplate), el, events)
-
-    pageContainers.gallery.append(Catolog.render())
+  const cotolog: HTMLElement[] = []
+  product.getMassProduct().map(el => {
+    const catolog = new CatologProduct(cloneTemplate(pageContainers.cardCatalogTemplate), {
+      onClick: () => events.emit('click:card:page', el)
+    })
+    cotolog.push(catolog.render())
+    return [
+      catolog.cotegoryClass = el.category,
+      catolog.cotegoryValie = el.category,
+      catolog.titleValue = el.title,
+      catolog.imgValue = el.image,
+      catolog.priceValue = el.price,
+    ]
   })
+  pageContainers.gallery.replaceChildren(...cotolog)
 })
 
 // Клик на карточку
-events.on('click:card:page', (product) => {
+events.on('click:card:page', (product: IProduct) => {
   modal.openModal();
-  const Cadr = new Card(cloneTemplate(pageContainers.cardPreviewTemplate), Object(product), cartData, events)
 
-  pageContainers.modalContent.append(Cadr.render());
+  const cardPreview = new Card(cloneTemplate(pageContainers.cardPreviewTemplate), basketData.allProducts.includes(product) || product.price === null, {
+    onClick: () => events.emit('click:add:basket', product)
+  })
+
+  cardPreview.imgValue = product.image;
+  cardPreview.cotegoryClass = product.category;
+  cardPreview.cotegoryValie = product.category;
+  cardPreview.titleValue = product.title;
+  cardPreview.priceValue = product.price;
+
+  pageContainers.modalContent.replaceChildren(cardPreview.render());
 })
 
 // Добавление в корзину
 events.on('click:add:basket', (product) => {
-  cartData.addProductBasket = (Object(product));
-  modal.setClassCloseModal();
+  basketData.addProductBasket = (Object(product));
+  modal.closeModal();
+})
+
+// Удаление с корзины
+events.on('delet:prod:basket', (product: IProduct) => {
+  basketData.deleteProduct(product);
 })
 
 // Открытие корзины
 events.on('click:basket', () => {
-  modal.ModalContent.append(basketQ.basket);
-  basketQ.setDisabled(basketQ.basketButton, !(cartData.ProductsQuantity > 0))
-  basketQ.basketPrice.textContent = basketQ.convertToPriceString(cartData.TotalPrice);
-
-  events.emit('render:basket:list');
+  modal.modalContent.replaceChildren(basket.basket);
+  basket.basketPrice.textContent = basket.convertToPriceString(basketData.totalPrice);
 })
 
-// Отображение списка корзины
+// Отображение списка корзины  
 events.on('render:basket:list', () => {
-  basketQ.clearBasketList();
-  let i: number = 1
-  cartData.AllProducts.forEach(element => {
-    const product = new CardBasket(cloneTemplate(pageContainers.cardBasketTemplate), element, cartData, i)
-    basketQ.getList.append(product.render());
-    i++
+  let i: number = 1;
+  basket.items = basketData.allProducts.map(element => {
+    const cardBasket = new CardBasket(cloneTemplate(pageContainers.cardBasketTemplate), {
+      onClick: () => events.emit('delet:prod:basket', element)
+    });
+
+    cardBasket.titleValue = element.title;
+    cardBasket.priceValue = element.price;
+    cardBasket.basketIntex = i++;
+
+    return cardBasket.render()
   });
 })
 
 // Отображение формы ордер
 events.on('click:form:order', () => {
   modal.clearModalContent();
-
-  modal.ModalContent.append(orderForm.render());
-
-  orderForm.validButtonPayment();
-  orderForm.validInput();
+  validSetting.validInputsOrder(orderForm.inputsForms);
+  validSetting.validButtonPayment(orderForm.paymentsButton, 'button_alt-active')
+  modal.modalContent.replaceChildren(orderForm.render());
 })
 
 // Отображение формы контакт
 events.on('click:form:content', () => {
   modal.clearModalContent();
-
-  modal.ModalContent.append(contacts.render());
+  validSetting.validInputsContact(contacts.inputsForms);
+  modal.modalContent.replaceChildren(contacts.render());
 })
+
+// Валидация кнопок оплаты
+events.on('payment:valid', () => {
+  orderForm.showErrorMessage = validSetting.showErrorMessage(['formOfPayment', 'address']);
+  orderForm.getDisablesButton = (validSetting.formValid.formOfPayment && validSetting.formValid.address)
+})
+
+// Валидация инпутов order
+events.on('input:valid:order', () => {
+  orderForm.showErrorMessage = validSetting.showErrorMessage(['payment', 'addres']);
+  orderForm.getDisablesButton = (validSetting.formValid.formOfPayment && validSetting.formValid.address)
+})
+
+// Валидация инпутов contect
+events.on('input:valid:contact', () => {
+  contacts.showErrorMessage = validSetting.showErrorMessage(['phone', 'email']);
+  contacts.getDisablesButton = (validSetting.formValid.email && validSetting.formValid.phone);
+})
+
 
 // Сохранение данных в ордер
 events.on('seve:info:order', () => {
-  order.payment = settings.array.payment;
-  order.addres = settings.array.address;
-  order.email = settings.array.email;
-  order.phone = settings.array.phone;
-  order.items = cartData.allIdProducts;
-  order.total = cartData.TotalPrice;
+  order.payment = orderForm.paymentInfo;
+  order.addres = orderForm.addressInfo;
+  order.email = contacts.inputInfo.email;
+  order.phone = contacts.inputInfo.phone;
+  order.items = basketData.allIdProducts;
+  order.total = basketData.totalPrice;
 })
 
 // Отправка двнных на сервер
 events.on('send:info:server', () => {
-
   contentApi.post('/order', order.оrderArray)
     .then(() => {
       modal.clearModalContent();
-      success.price = cartData.TotalPrice;
-      modal.ModalContent.append(success.getSuccess());
-      events.emit('dalete:info');
+      success.price = basketData.totalPrice;
+      modal.modalContent.replaceChildren(success.getSuccess());
     })
-    .catch((error) => contacts.showErrorMessage = ([`${error}`]) )
-})
-
-// Очистка форм и информации
-events.on('dalete:info', () => {
-  cartData.deleteAllProducts();
-  orderForm.deleteInfoFormValid();
-  orderForm.clearValidForm();
-  contacts.clearValidForm();
-  events.emit('counter:basket');
-  settings.array = {
-    payment: '',
-    address: '',
-    email: '',
-    phone: '',
-  }
+    .then( () => {
+        basketData.deleteAllProducts();
+        contacts.clearInputValue();
+        orderForm.clearInputValue();
+        orderForm.clearPayment();
+        basketData.deleteAllProducts(); 
+        validSetting.clearFormValid();
+        order.clearOrderArray();
+      }
+    )
+    .catch((error) => contacts.showErrorMessage = error)
 })
