@@ -1,20 +1,19 @@
-import { IMouseClick } from "../types";
+import { IEvents, IKeydown, IMouseClick } from "../types";
 import { IModalElement, IModalWindows, ISuccess, } from "../types/Modal";
 import { Component } from "./base/Component";
-import { EventEmitter } from "./base/events";
 
-abstract class ModalElement extends Component<IModalElement> implements IModalElement {
+abstract class ModalElement extends Component<ModalElement> implements IModalElement {
   /** Контейнер модального окна */
-  _modal: HTMLElement;
+  protected _modal: HTMLElement;
 
   /** Контейнер для вставки контента */
-  _modalContent: HTMLElement;
+  protected _modalContent: HTMLElement;
 
   /** Класс открытия модального окна */
-  _class: string;
+  protected _class: string;
 
   /** Кнопка закрытия модального окна */
-  _buttonClose: HTMLButtonElement;
+  protected _buttonClose: HTMLButtonElement;
 
   constructor(
     _modal: HTMLElement,
@@ -38,19 +37,14 @@ abstract class ModalElement extends Component<IModalElement> implements IModalEl
     this._modal.style.removeProperty('position');
   }
 
-  /** Элемент контента модального окна */
-  get modalContent(): HTMLElement {
-    return this._modalContent;
+  /** Вставить информацию в модальное окно */
+  set modalContent(items: HTMLElement) {
+    this._modalContent.replaceChildren(items);
   }
 
   /** Кнопка закрытия модального окна */
   get buttonClose(): HTMLButtonElement {
     return this._buttonClose;
-  }
-
-  /** Модальное окно */
-  get modal(): HTMLElement {
-    return this._modal;
   }
 
   /** Очистка модального окна */
@@ -61,18 +55,18 @@ abstract class ModalElement extends Component<IModalElement> implements IModalEl
 
 export class ModalWindows extends ModalElement implements IModalWindows {
   /** Емитор */
-  events: EventEmitter;
+  protected events: IEvents;
 
   constructor(
     _modal: HTMLElement,
     _class: string,
-    events: EventEmitter,
+    events: IEvents,
   ) {
     super(_modal, _class);
 
     this.events = events;
     this.buttonClose.addEventListener('click', () => this.closeModal());
-    this.modal.addEventListener('click', (evt) => {
+    this._modal.addEventListener('click', (evt) => {
       const el = evt.target as HTMLElement;
       if (el.id === 'modal-container') {
         this.closeModal();
@@ -82,36 +76,37 @@ export class ModalWindows extends ModalElement implements IModalWindows {
   
   /** Открыть модальное окно */
   openModal(): void {
-    this.modal.classList.add(this._class);
+    this._modal.classList.add(this._class);
     this.events.emit('open:modal')
   }
 
   /** Закрыть модальное окно */
   closeModal(): void {
-    this.modal.classList.remove(this._class);
+    this._modal.classList.remove(this._class);
     this.events.emit('close:modal');
   }
-
 }
 
 /** Класс оповещия о заверщение покупки */
-export class Success implements ISuccess {
+export class Success extends Component<ISuccess> implements ISuccess{
+  
   /** Контейнер окна оповещия о заверщение покупки */
-  container: HTMLElement;
+  protected container: HTMLElement;
 
   /** Описание успешного выполнения заказа */
-  orderSuccessDescription: HTMLElement;
+  protected orderSuccessDescription: HTMLElement;
 
   /** Кнопка закрытия окна */
-  orderSuccessClose: HTMLButtonElement;
+  protected orderSuccessClose: HTMLButtonElement;
 
   /** Емитер */
-  events: EventEmitter;
+  protected events: IEvents;
 
   constructor(
     container: HTMLElement,
     click: IMouseClick,
   ) {
+    super(container)
     this.container = container;
 
     this.events = this.events;
@@ -120,11 +115,6 @@ export class Success implements ISuccess {
     this.orderSuccessClose = this.container.querySelector('.order-success__close');
 
     this.orderSuccessClose.addEventListener('click', click.onClick);
-  }
-
-  /** Контейнер окна оповещия о заверщение покупки */
-  getSuccess() {
-    return this.container;
   }
 
   /** Установить стоимость заказа */

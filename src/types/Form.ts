@@ -1,95 +1,52 @@
-import { EventEmitter } from "../components/base/events";
+import { Component } from "../components/base/Component";
+import { IContactField, IOrderField } from "./AppData";
 
-export interface IForm {
-  /** Форма */
-  forms: HTMLFormElement;
+export interface IForm<T> extends Component<IFormState> {
+  /** Состояние кнопки отправки формы */
+  set valid(value: boolean)
 
-  /** Кнопка отправки формы */
-  buttonSubmit: HTMLButtonElement;
+  /** Установить текс ошибок в форму */
+  set errors(value: string)
 
-  /** Контейнер ошибок формы */
-  errorContainer: HTMLElement;
+  /** Рендеринга формы */
+  render(state: Partial<T> & IFormState): HTMLFormElement
 
-  /** Инпуты формы */
-  inputsForms: HTMLInputElement[];
-
-  /** Установить сообщение ошибки */
-  set showErrorMessage(values: string)
-
-  /** Отключение кнопки формы */
-  set getDisablesButton(bool: boolean)
 }
 
-export interface IFormOrder {
-  /** Класс активной кнопки */
-  className: string;
+export interface ContactsForm extends IForm<IContactField> {
 
-  /** Кнопки оплаты */
-  paymentsButton: HTMLButtonElement[];
+  /** Установить значения поля ввода телефон */
+  set phone(value: string)
 
-  /** Получить информацию об оплате */
-  get paymentInfo(): string
+  /** Установить значения поля ввода email */
+  set email(value: string)
+}
 
-  /** Получить адресс доставки */
-  get addressInfo(): string
+export interface DeliveryForm extends IForm<IOrderField> {
 
-  /** Очистить поля ввода формы */
-  clearInputValue(): void
+  /** Удалить активный класс с кнопок */
+  disableButtons(): void
 
-  /** Очистить информацию об оплате */
-  clearPayment(): void
+  /** Установить активный класс на кнопку */
+  set payment(value: string)
+
+  /** Установить значения поля ввода адрес */
+  set address(value: string)
 }
 
 export interface IFormContact {
-
-  /** Получить информацию полей Email и Phone */
-  get inputInfo(): IInputValue
-
   /** Очистить поля формы */
   clearInputValue(): void
 }
 
-export interface IValidForm {
-
-  /** Емитер */
-  events: EventEmitter;
-
-  /** Массив валидации формы */
-  formValid: IFormValid;
-
-  /** Валидация кнопок оплаты */
-  validButtonPayment(button: HTMLButtonElement[], className: string): void
-
-  /** Валидация инпутов формы order */
-  validInputsOrder(inputs: HTMLInputElement[]): void
-
-  /** Валидация инпутов формы contacts */
-  validInputsContact(inputs: HTMLInputElement[]): void
-
-
-  /** Установить сообщение ошибки */
-  showErrorMessage(values: string[]): void
-
-  /** Очистить массив валидации */
-  clearFormValid(): void
+export interface IFormState {
+  valid: boolean;
+  errors: string[];
 }
 
-export interface IFormValid  {
-  'formOfPayment': boolean;
-  'address': boolean;
-  'email': boolean;
-  'phone': boolean;
-}
-
-export interface IErrorMessage  {
-  'formOfPayment': string;
-  'address': string;
-  'email': string;
-  'phone': string;
-  'NotFound': string;
-}
-
-export interface IInputValue {
+export interface IOrderForm {
+  payment: string;
+  address: string;
   email: string;
   phone: string;
 }

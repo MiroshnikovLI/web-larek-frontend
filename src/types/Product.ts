@@ -1,25 +1,3 @@
-import { EventEmitter } from "../components/base/events";
-
-export interface IProductCardManager {
-  /** Емитер */
-  events: EventEmitter;
-
-  /** Массив для отправки на сервер */
-  оrderAmount: IOrderAmount
-
-  /** Массив продукта */
-  massProduct: IProduct[];
-
-  /** Записать массив продуктов */
-  setMassProduct(product: IProduct[]): void
-
-  /** Получить массив продуктов */
-  getMassProduct(): IProduct[]
-
-  /** Получить массив заказа */
-  getToSendProduct(product: IProduct[], userInfo: IMassInfo): IOrderAmount
-}
-
 export interface IProduct {
   /** ID продукта */
   id: string;
@@ -38,16 +16,4 @@ export interface IProduct {
 
   /** Цена продукта */
   price: number | null;
-}
-
-export interface IOrderAmount {
-  product: IProduct[];
-  userInfo: IMassInfo;
-}
-
-export interface IMassInfo {
-  formOfPayment: string;
-  address: string;
-  email: string;
-  phone: string;
 }

@@ -1,4 +1,4 @@
-export interface IBodyHtmlElement {
+export class IBodyHtmlElement {
   /** Body */
   body: HTMLElement;
 
@@ -10,9 +10,9 @@ export interface IBodyHtmlElement {
 
   /** Элемент галерее страницы */
   gallery: HTMLElement;
-  
+
   /** Кнопка корзины */
-  buttonBasket: HTMLElement;
+  buttonBasket: HTMLButtonElement;
 
   /** Счетчик корзины */
   basketCounter: HTMLElement;
@@ -37,17 +37,21 @@ export interface IBodyHtmlElement {
 
   /** Темплейт уведомление о завершение покупки */
   successTemplate: HTMLTemplateElement;
-
 }
 
 export interface IPage extends IBodyHtmlElement {
   /** Body */
   body: HTMLElement;
 
+  /** Показать каталог карточек */
+  set cotologProduct(items: HTMLElement[])
+
   /** Заблокировать прокрутку страницы */
   disablePageScroll(): void
 
   /** Установить прокутку страницы */
   enablePageScroll(): void
-}
 
+  /** Установить счектчик корзины */
+  counterBasket(count: number): void
+}

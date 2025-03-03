@@ -1,5 +1,5 @@
 import { IMouseClick } from "../types";
-import { IBaseCard, ICardBasket, ImassCotegory } from "../types/Cards";
+import { IBaseCard, ICardBasket, ImassCotegory, } from "../types/Cards";
 import { CDN_URL } from "../utils/constants";
 import { ensureElement } from "../utils/utils";
 import { Component } from "./base/Component";
@@ -7,25 +7,25 @@ import { Component } from "./base/Component";
 /** Класс Элементов карточки */
 export abstract class BaseCard extends Component<IBaseCard> {
   /** Карточка */
-  _card: HTMLElement;
+  protected _card: HTMLElement;
 
   /** Элемент карточки: Котегория */
-  _cotegory: HTMLElement;
+  protected _cotegory: HTMLElement;
 
   /** Элемент карточки: Изображение */
-  _image: HTMLImageElement;
+  protected _image: HTMLImageElement;
 
   /** Элемент карточки: Заголовок */
-  _title: HTMLElement;
+  protected _title: HTMLElement;
 
   /** Элемент карточки: Ценна */
-  _price: HTMLElement;
+  protected _price: HTMLElement;
 
   /** Элемент карточки: Описание */
-  _text: HTMLElement;
+  protected _text: HTMLElement;
 
   /** Элемент карточки: Кнопка */
-  _button: HTMLButtonElement;
+  protected _button: HTMLButtonElement;
 
   /** Массив котегорий карточек */
   readonly massCotegory: ImassCotegory = {

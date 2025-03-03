@@ -6,12 +6,13 @@ import { ModalWindows, Success } from './components/Modal';
 import { CardBasket, Card, CatologProduct } from './components/Cards';
 import { Page } from './components/Page';
 import { EventEmitter } from './components/base/events';
-import { BasketData, Basket } from './components/Basket';
-import { ProductCardManager } from './components/Product';
 import { cloneTemplate, } from './utils/utils';
-import { Order } from './components/Order';
 import { IProduct } from './types/Product';
-import { FormContact, FormOrder, ValidForm } from './components/Form';
+import { ContactsForm, OrderForm, } from './components/Form';
+import { AppState, } from './components/AppData';
+import { IContactField, IOrderField } from './types/AppData';
+import { Basket } from './components/Basket';
+import { IOrderForm } from './types/Form';
 
 /** Подключение к серверу */
 const contentApi = new Api(API_URL);
@@ -19,14 +20,8 @@ const contentApi = new Api(API_URL);
 /** Обработчик событий */
 const events = new EventEmitter();
 
-/** Продукт */
-const product = new ProductCardManager(events);
-
 /** Элементы страницы */
 const pageContainers = new Page(document.querySelector('.page'));
-
-/** Данные корзины */
-const basketData = new BasketData({}, events);
 
 /** Класс корзины */
 const basket = new Basket(cloneTemplate(pageContainers.basketTemplate), events, pageContainers.buttonBasket, {
@@ -41,32 +36,18 @@ const basket = new Basket(cloneTemplate(pageContainers.basketTemplate), events, 
 const modal = new ModalWindows(pageContainers.modal, 'modal_active', events)
 
 /** Форма ордер */
-const orderForm = new FormOrder(cloneTemplate(pageContainers.orderTemplate), 'button_alt-active', {
-  onClick: () => {
-    events.emit('click:form:content');
-    validSetting.clearFormValid();
-  }
-});
+const orderForm = new OrderForm(cloneTemplate(pageContainers.orderTemplate), events);
 
 /** Форма контакты */
-const contacts = new FormContact(cloneTemplate(pageContainers.contactsTemplate), {
-  onClick: () => {
-    events.emit('seve:info:order');
-    events.emit('send:info:server');
-    validSetting.clearFormValid();
-  }
-});
-
-/** Класс валидации форм */
-const validSetting = new ValidForm(events)
+const formContacts = new ContactsForm(cloneTemplate(pageContainers.contactsTemplate), events)
 
 /** Модальное окно успешного завершания покупок */
 const success = new Success(cloneTemplate(pageContainers.successTemplate), {
   onClick: () => modal.closeModal()
 });
 
-/** Класс order для отправки информации на сервер о заказе */
-const order = new Order();
+/** Класс хранения и управления данными сайта */
+const appData = new AppState({}, events);
 
 /** Открытие модального окна */
 events.on('open:modal', () => {
@@ -92,24 +73,25 @@ const closeEsc = function (evt: KeyboardEvent) {
 
 // Счетчик корзины
 events.on('counter:basket', () => {
-  pageContainers.counterBasket(basketData.productsQuantity)
+  pageContainers.counterBasket(appData.productsQuantity)
 })
 
 // Получение массива продукта
 contentApi.get('/product')
   .then((ress: IAPIresponse) => {
-    product.setMassProduct(ress.items as IProduct[]);
+    appData.setMassProduct(ress.items as IProduct[]);
   })
   .catch((err) => console.log(err));
 
 // Отображение карточек 
 events.on('product:view', () => {
   const cotolog: HTMLElement[] = []
-  product.getMassProduct().map(el => {
+  appData.getMassProduct().map(el => {
     const catolog = new CatologProduct(cloneTemplate(pageContainers.cardCatalogTemplate), {
       onClick: () => events.emit('click:card:page', el)
     })
     cotolog.push(catolog.render())
+
     return [
       catolog.cotegoryClass = el.category,
       catolog.cotegoryValie = el.category,
@@ -118,14 +100,16 @@ events.on('product:view', () => {
       catolog.priceValue = el.price,
     ]
   })
-  pageContainers.gallery.replaceChildren(...cotolog)
+  
+  pageContainers.cotologProduct = cotolog;
 })
 
 // Клик на карточку
 events.on('click:card:page', (product: IProduct) => {
+  
   modal.openModal();
 
-  const cardPreview = new Card(cloneTemplate(pageContainers.cardPreviewTemplate), basketData.allProducts.includes(product) || product.price === null, {
+  const cardPreview = new Card(cloneTemplate(pageContainers.cardPreviewTemplate), appData.allProducts.includes(product) || product.price === null, {
     onClick: () => events.emit('click:add:basket', product)
   })
 
@@ -135,30 +119,30 @@ events.on('click:card:page', (product: IProduct) => {
   cardPreview.titleValue = product.title;
   cardPreview.priceValue = product.price;
 
-  pageContainers.modalContent.replaceChildren(cardPreview.render());
+  modal.modalContent = cardPreview.render();
 })
 
 // Добавление в корзину
 events.on('click:add:basket', (product) => {
-  basketData.addProductBasket = (Object(product));
+  appData.addProductBasket = (Object(product));
   modal.closeModal();
 })
 
 // Удаление с корзины
 events.on('delet:prod:basket', (product: IProduct) => {
-  basketData.deleteProduct(product);
+  appData.deleteProduct(product);
 })
 
 // Открытие корзины
 events.on('click:basket', () => {
-  modal.modalContent.replaceChildren(basket.basket);
-  basket.basketPrice.textContent = basket.convertToPriceString(basketData.totalPrice);
+  modal.modalContent = basket.render();
+  basket.basketPrice = appData.totalPrice;
 })
 
 // Отображение списка корзины  
 events.on('render:basket:list', () => {
   let i: number = 1;
-  basket.items = basketData.allProducts.map(element => {
+  basket.items = appData.allProducts.map(element => {
     const cardBasket = new CardBasket(cloneTemplate(pageContainers.cardBasketTemplate), {
       onClick: () => events.emit('delet:prod:basket', element)
     });
@@ -171,67 +155,82 @@ events.on('render:basket:list', () => {
   });
 })
 
+
 // Отображение формы ордер
 events.on('click:form:order', () => {
   modal.clearModalContent();
-  validSetting.validInputsOrder(orderForm.inputsForms);
-  validSetting.validButtonPayment(orderForm.paymentsButton, 'button_alt-active')
-  modal.modalContent.replaceChildren(orderForm.render());
+  modal.modalContent = orderForm.render({
+    payment: '',
+    address: '',
+    valid: false,
+    errors: []
+  });
 })
 
 // Отображение формы контакт
 events.on('click:form:content', () => {
   modal.clearModalContent();
-  validSetting.validInputsContact(contacts.inputsForms);
-  modal.modalContent.replaceChildren(contacts.render());
+  modal.modalContent = formContacts.render({
+    phone: '',
+    email: '',
+    valid: false,
+    errors: []
+  });
 })
 
-// Валидация кнопок оплаты
-events.on('payment:valid', () => {
-  orderForm.showErrorMessage = validSetting.showErrorMessage(['formOfPayment', 'address']);
-  orderForm.getDisablesButton = (validSetting.formValid.formOfPayment && validSetting.formValid.address)
+// Слушатель изменения данных формы ордер
+events.on(/^order\..*:change/, (data: { field: keyof IOrderField, value: string }) => {
+  appData.setOrderField(data.field, data.value);
+  if (data.field === 'payment') { orderForm.payment = data.value }
 })
 
-// Валидация инпутов order
-events.on('input:valid:order', () => {
-  orderForm.showErrorMessage = validSetting.showErrorMessage(['payment', 'addres']);
-  orderForm.getDisablesButton = (validSetting.formValid.formOfPayment && validSetting.formValid.address)
-})
-
-// Валидация инпутов contect
-events.on('input:valid:contact', () => {
-  contacts.showErrorMessage = validSetting.showErrorMessage(['phone', 'email']);
-  contacts.getDisablesButton = (validSetting.formValid.email && validSetting.formValid.phone);
+// Слушатель изменения данных формы констакты
+events.on(/^contacts\..*:change/, (data: { field: keyof Partial<IContactField>, value: string }) => {
+  appData.setContactField(data.field, data.value)
 })
 
 
-// Сохранение данных в ордер
-events.on('seve:info:order', () => {
-  order.payment = orderForm.paymentInfo;
-  order.addres = orderForm.addressInfo;
-  order.email = contacts.inputInfo.email;
-  order.phone = contacts.inputInfo.phone;
-  order.items = basketData.allIdProducts;
-  order.total = basketData.totalPrice;
+// Отображение ошибок формы контакт
+events.on('errors:contact:change', (errors: Partial<IOrderForm>) => {
+  const { email, phone } = errors;
+  formContacts.valid = !errors.email && !errors.phone;
+  formContacts.errors = Object.values({ phone, email }).filter(i => !!i).join(',');
+});
+
+// Отображение ошибок формы ордер
+events.on('errors:order:change', (errors: Partial<IOrderForm>) => {
+  const { payment, address } = errors;
+  orderForm.valid = !errors.payment && !errors.address;
+  orderForm.errors = Object.values({ payment, address }).filter(i => !!i).join(', ');
+});
+
+// Клик на кнопку далее в форме ордер
+events.on('order:submit', () => {
+  modal.modalContent = formContacts.render({    
+    phone: '',
+    email: '',
+    valid: false,
+    errors: []
+  });
 })
 
-// Отправка двнных на сервер
-events.on('send:info:server', () => {
-  contentApi.post('/order', order.оrderArray)
+// Клик на кнопку оплатить в форме контакты
+events.on('contacts:submit', () => {
+  contentApi.post('/order', appData.оrderArray)
     .then(() => {
       modal.clearModalContent();
-      success.price = basketData.totalPrice;
-      modal.modalContent.replaceChildren(success.getSuccess());
+      success.price = appData.totalPrice;
+      modal.modalContent = success.render();
     })
-    .then( () => {
-        basketData.deleteAllProducts();
-        contacts.clearInputValue();
-        orderForm.clearInputValue();
-        orderForm.clearPayment();
-        basketData.deleteAllProducts(); 
-        validSetting.clearFormValid();
-        order.clearOrderArray();
-      }
+    .then(() => {
+      appData.clearAllData();
+      formContacts.valid = true;
+      formContacts.email = '';
+      formContacts.phone = '';
+      orderForm.valid = true;
+      orderForm.payment = '';
+      orderForm.address = '';
+    }
     )
-    .catch((error) => contacts.showErrorMessage = error)
+    .catch(error => formContacts.errors = error)
 })

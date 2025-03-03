@@ -1,28 +1,6 @@
-/** Класс Элементов карточки */
-export interface IBaseCard {
-  /** Карточка */
-  _card: HTMLElement;
+import { Component } from "../components/base/Component";
 
-  /** Элемент карточки: Котегория */
-  _cotegory: HTMLElement;
-
-  /** Элемент карточки: Изображение */
-  _image: HTMLImageElement;
-
-  /** Элемент карточки: Заголовок */
-  _title: HTMLElement;
-
-  /** Элемент карточки: Ценна */
-  _price: HTMLElement;
-
-  /** Элемент карточки: Описание */
-  _text: HTMLElement;
-
-  /** Элемент карточки: Кнопка */
-  _button: HTMLButtonElement;
-
-  /** Массив котегорий карточек */
-  readonly massCotegory: ImassCotegory
+export interface IBaseCard extends Component<IBaseCard> {
 
   /** Установить изображение */
   set imgValue(value: string)
@@ -43,16 +21,17 @@ export interface IBaseCard {
   set textValue(value: string)
 }
 
-export interface ICardBasket {
+/** Класс карточки продукта в корзине */
+export interface ICardBasket extends IBaseCard {
+  
   /** Установить порядковыый номер товара в корзине */
   set basketIntex(value: number)
 }
 
-
 export interface ImassCotegory {
-  'софт-скил': string;
-  'другое': string;
-  'дополнительное': string;
-  'кнопка': string;
-  'хард-скил': string;
+  'софт-скил': 'card__category_soft',
+  'другое': 'card__category_other',
+  'дополнительное': 'card__category_additional',
+  'кнопка': 'card__category_button',
+  'хард-скил': 'card__category_hard'
 }

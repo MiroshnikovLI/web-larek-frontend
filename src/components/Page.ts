@@ -2,7 +2,7 @@ import { IBodyHtmlElement, IPage } from "../types/Page";
 import { ensureElement } from "../utils/utils";
 
 /** Класс Элементов страницы */
-export class BodyHtmlElement implements IBodyHtmlElement {
+export class BodyHtmlElement implements IBodyHtmlElement{
   /** Body */
   body: HTMLElement;
 
@@ -14,7 +14,7 @@ export class BodyHtmlElement implements IBodyHtmlElement {
 
   /** Элемент галерее страницы */
   gallery: HTMLElement;
-  
+
   /** Кнопка корзины */
   buttonBasket: HTMLButtonElement;
 
@@ -44,7 +44,7 @@ export class BodyHtmlElement implements IBodyHtmlElement {
 
   constructor(
     body: HTMLElement
-  ) { 
+  ) {
     this.body = body;
     this.modal = ensureElement<HTMLElement>('#modal-container', this.body);
     this.modalContent = ensureElement<HTMLElement>('.modal__content', this.modal);
@@ -67,10 +67,15 @@ export class Page extends BodyHtmlElement implements IPage {
   body: HTMLElement;
 
   constructor(
-    body: HTMLElement, 
+    body: HTMLElement,
   ) {
     super(body)
     this.body = document.body;
+  }
+
+  /** Показать каталог карточек */
+  set cotologProduct(items: HTMLElement[]) {
+    this.gallery.replaceChildren(...items);
   }
 
   /** Заблокировать прокрутку страницы */
@@ -82,7 +87,7 @@ export class Page extends BodyHtmlElement implements IPage {
   enablePageScroll() {
     this.body.style.overflow = 'auto';
   }
-  
+
   /** Установить счектчик корзины */
   counterBasket(count: number) {
     this.basketCounter.textContent = `${count}`

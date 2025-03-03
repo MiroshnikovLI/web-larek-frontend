@@ -57,35 +57,27 @@ yarn build
 
 ### [1) Класс Api.](#1) <p>Используется для взаимодействия с REST API.</p>
 
-### [2) Класс BasketData.](#2) <p>Описывает структуру и поведение данных корзины.</p>
+### [2) Класс AppState.](#2) <p>описывает состояние приложения, включая список товаров, корзину, заказ и ошибки формы.</p>
 
-### [3) Класс ProductCardManager.](#3) <p>Используется для работы с карточками продуктов и управления заказами.</p>
+### [3) класс BaseCard.](#3) <p>описывает структуру и поведение элементов карточки.</p>
 
-### [4) Класс Order.](#4) <p>Используется для управления информацией о заказе.</p>
+### [4) Класс CatologProduct.](#4) <p>описывает карточку товара в каталоге.</p>
 
-### [5) Класс BaseCard.](#5) <p>Описывает структуру и поведение элементов карточки.</p>
+### [5) Класс Card.](#5) <p>описывает карточку товара.</p>
 
-### [6) Класс CatologProduct.](#6) <p>Используется для создания элементов каталога продуктов.</p>
+### [6) Класс CardBasket.](#6) <p>описыват карточку в корзине.</p>
 
-### [7) Класс Card.](#7) <p>Используется для создания карточек продуктов.</p>
+### [7) Класс Basket.](#7) <p>описывает корзину.</p>
 
-### [8) Класс CardBasket.](#8) <p>Используется для создания карточек продуктов в корзине.</p>
+### [8) Класс Form.](#8) <p>описывает структуру и механизм обработки ввода данных и отправки формы.</p>
 
-### [9) Класс BasketElement.](#9) <p>Описывает структуру и поведение элемента корзины.</p>
+### [9) Класс OrderForm.](#9) <p>описывает способ выбора оплаты и адреса доставки.</p>
 
-### [10) Класс Basket.](#10) <p>Описывает структуру и поведение корзины.</p>
+### [10) Класс ContactsForm.](#10) <p>описывает форму ввода контактных данных.</p>
 
-### [11) Класс Form.](#11) <p>Используется для работы с формами.</p>
+### [11) Класс Success.](#11) <p>описывает окна оповещения завершения покупки.</p>
 
-### [12) Класс FormOrder.](#12) <p>Используется для работы с формой заказа.</p>
-
-### [13) Класс FormContact.](#13) <p>Используется для работы с формой контактов.</p>
-
-### [14) Класс Success.](#14) <p>Используется для отображения окна с оповещением о завершении покупки.</p>
-
-### [15) Класс ValidForm.](#15) <p>Используеться для валидации информации.</p>
-
-### [16) Описание событий.](#16)
+### [12) Описание событий.](#12)
 
 > <h1 style="font-weight: bold; color: #FFF;">Данные</h1>
 
@@ -95,13 +87,14 @@ yarn build
 
 Класс имеет следующие свойства:
 
-baseUrl — строка, содержащая базовый URL для запросов;
-options — объект, содержащий настройки для запросов (например, заголовки).
+- baseUrl — строка, содержащая базовый URL для запросов;
+- options — объект, содержащий настройки для запросов (например, заголовки).
+
 Конструктор класса принимает два параметра: baseUrl и options. В теле конструктора инициализируются свойства класса.
 
-Метод handleResponse обрабатывает ответ от сервера. Если ответ успешный (response.ok), метод возвращает JSON-представление ответа. В противном случае метод возвращает ошибку.
+- Метод handleResponse обрабатывает ответ от сервера. Если ответ успешный (response.ok), метод возвращает JSON-представление ответа. В противном случае метод возвращает ошибку.
 
-Методы get и post выполняют GET- и POST-запросы соответственно. Они принимают URI для запроса и, в случае POST-запроса, данные для отправки. Затем они вызывают метод handleResponse для обработки ответа.
+- Методы get и post выполняют GET- и POST-запросы соответственно. Они принимают URI для запроса и, в случае POST-запроса, данные для отправки. Затем они вызывают метод handleResponse для обработки ответа.
 
 ```
 
@@ -122,126 +115,91 @@ class Api {
 
 <a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
 
+<h3 id='2'>Класс AppState</h3>
 
-<h3 id="2">Корзина</h3> 
+Класс AppState, который расширяет класс Model и реализует интерфейс IAppState. Он описывает состояние приложения, включая список товаров, корзину, заказ и ошибки формы.
 
-Класс BasketData, расширяет класс Model и реализует интерфейс IBasketData. Класс описывает структуру и поведение данных корзины.
+Основные свойства класса:
 
-В классе объявлены следующие свойства и методы:
+- massProduct: массив товаров.
+- basketItems: массив товаров в корзине.
+- order: объект заказа, содержащий поля для контактной информации, оплаты, общей суммы и т. д.
+- formErrors: объект ошибок формы.
 
-basketItems — массив, содержащий товары в корзине.
-addProductBasket — сеттер, который добавляет товар в корзину, если его там ещё нет.
-deleteAllProducts — метод, который удаляет все товары из корзины.
-ProductsQuantity — геттер, который возвращает количество товаров в корзине.
-allProducts — геттер, который возвращает все товары в корзине.
-totalPrice — геттер, который возвращает общую сумму товаров в корзине.
-deleteProduct — метод, который удаляет товар из корзины по его идентификатору.
-allIdProducts - геттер, который возвращает массив строк с идентификаторами всех товаров в корзине.
+Класс содержит следующие методы:
 
-```
+- Метод: setContactField: устанавливает значение поля контактной информации в объекте order и вызывает метод validateContacts для проверки правильности заполнения полей.
 
-class BasketData extends Model<IProduct> implements IBasketData {
-  basketItems: IProduct[];
+- Метод: setOrderField: устанавливает значение поля заказа в объекте order и вызывает метод validateOrder.
 
-  set addProductBasket(product: IProduct) 
+- Метод: validateContacts: Проверяет правильность заполнения полей заказа (email и phone). Устанавливает соответствующие ошибки в объекте formErrors. Вызывает super.emitChanges для уведомления о изменении ошибок. Возвращает true, если все поля заполнены правильно, и false в противном случае.
+
+- Метод validateOrder: Проверяет правильность заполнения полей заказа (payment и address). Устанавливает соответствующие ошибки в объекте formErrors. Вызывает super.emitChanges для уведомления о изменении ошибок. Возвращает true, если все поля заполнены правильно, и false в противном случае.
+
+- Сетер AddProductBasket: Добавляет товар в корзину, если его там ещё нет. Вызывает super.emitChanges для уведомления об изменении количества товаров в корзине и необходимости перерендеринга списка товаров в корзине.
+
+- Метод deleteAllProducts: Очищает корзину, устанавливая длину массива basketItems в 0. Вызывает super.emitChanges для уведомления об изменении количества товаров в корзине.
+
+- Гетер ProductsQuantity: Возвращает количество товаров в корзине.
+
+- Гетер allProducts: Возвращает массив всех товаров в корзине.
+
+- Гетер TotalPrice: Рассчитывает общую цену товаров в корзине, суммируя цены всех товаров.
+
+- Метод deleteProduct: Удаляет указанный товар из корзины, фильтруя массив basketItems по id. вызывают метод emitChanges для уведомления о различных событиях, изменение количества товаров, клик по корзине и необходимость перерендеринга списка товаров в корзине.
+
+- Гетер allIdProducts: Возвращает массив идентификаторов всех товаров в корзине. Проходит по массиву allProducts и добавляет id каждого товара в результирующий массив.
+
+- Метод setMassProduct: Устанавливает массив товаров massProduct. Вызывает super.emitChanges для уведомления о изменении списка товаров.
+
+- Метод getMassProduct: Возвращает массив товаров massProduct.
+
+- Гетер оrderArray: Устанавливает общую цену заказа total и массив идентификаторов товаров items в объекте order. Возвращает объект order.
+
+- Метод clearAllData: Очищает корзину, вызывая метод deleteAllProducts. Устанавливает все поля объекта order в начальное состояние.
+
+``` 
+
+
+class AppState extends Model<IAppState> {
+
+  protected massProduct: IProduct[];
+
+  protected basketItems: IProduct[];
+
+  protected order: IOrderArray
+
+  protected formErrors: FormErrors;
+
+  setContactField(field: keyof IContactField, value: string)
+
+  setOrderField(field: keyof IOrderField, value: string)
+
+  validateContacts()
+
+  validateOrder()
+
+  set addProductBasket(product: IProduct)
 
   deleteAllProducts()
 
   get productsQuantity(): number
 
-  get AllProducts(): IProduct[] 
+  get allProducts(): IProduct[]
 
-  get totalPrice(): number 
+  get totalPrice(): number
 
   deleteProduct(product: IProduct) 
 
   get allIdProducts(): string[]
-}
-
-```
-
-<a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
-
-<h3 id="3">Товар</h3>
-
-Класс ProductCardManager, реализует интерфейс IProductCardManager. Он используется для работы с карточками продуктов и управления заказами.
-
-Класс имеет следующие свойства:
-
-events: объект типа EventEmitter, который используется для управления событиями.
-orderAmount: объект типа IOrderAmount, который содержит массив продуктов и информацию о пользователе для отправки заказа на сервер.
-massProduct: массив продуктов типа IProduct.
-Конструктор класса принимает объект events типа EventEmitter в качестве параметра и инициализирует свойство events.
-
-Класс предоставляет следующие методы:
-
-setMassProduct: устанавливает массив продуктов massProduct и вызывает событие "product:view".
-getMassProduct: возвращает массив продуктов massProduct.
-getToSendProduct: создаёт объект orderAmount с массивом продуктов product и информацией о пользователе userInfo, а затем возвращает его.
-
-```
-
-class ProductCardManager implements IProductCardManager {
-  events: EventEmitter;
-
-  оrderAmount: IOrderAmount
-
-  massProduct: IProduct[];
-
-  constructor(
-    events: EventEmitter
-  )
 
   setMassProduct(product: IProduct[])
 
   getMassProduct(): IProduct[]
 
-  getToSendProduct(product: IProduct[], userInfo: IMassInfo)
-}
-
-```
-
-<a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
-
-<h3 id="4">Информация о заказе</h3>
-
-Класс Order, реализует интерфейс IOrder. Он используется для управления информацией о заказе.
-
-Класс имеет одно свойство:
-
-order: объект типа IOrderArray, который содержит информацию о заказе, такую как список товаров, способ оплаты, общая сумма, адрес доставки, email и номер телефона.
-Класс предоставляет следующие методы:
-
-set items: устанавливает список идентификаторов продуктов в свойстве items объекта order.
-set payment: устанавливает информацию об оплате в свойстве payment объекта order.
-set total: устанавливает общую сумму заказа в свойстве total объекта order.
-set addres: устанавливает адрес доставки в свойстве address объекта order.
-set email: устанавливает email в свойстве email объекта order.
-set phone: устанавливает номер телефона в свойстве phone объекта order.
-get orderArray: возвращает объект order.
-clearOrderArray: очищает объект order, устанавливая все его свойства в начальные значения.
-
-
-```
-
-class Order implements IOrder {
-  order: IOrderArray
-
-  set items(product: string[])
-
-  set payment(value: string)
-
-  set total(count: number)
-
-  set addres(shippingAddress: string)
-
-  set email(email: string)
-
-  set phone(phone: string)
-
   get оrderArray()
 
-  clearOrderArray()
+  clearAllData()
 }
 
 ```
@@ -252,69 +210,86 @@ class Order implements IOrder {
   
 <h2>Товар</h2>
 
-<h3 id="5">Елементы карточек</h3>
+<h3 id="3">Елементы карточек</h3>
 
 Абстрактный класс BaseCard, который расширяет класс Component и реализует интерфейс IBaseCard. Класс описывает структуру и поведение элементов карточки.
 
 Конструктор принимает один параметр _card типа HTMLElement и вызывает конструктор родительского класса super(_card). Затем он инициализирует различные элементы карточки, используя метод querySelector и вспомогательную функцию ensureElement.
 
-Сеттеры imgValue, titleValue, textValue, priceValue и cotegoryValue устанавливают значения для изображения, заголовка, описания, цены и категории соответственно. Они принимают объект product типа IProduct и устанавливают соответствующие свойства элементов карточки.
-
 В классе объявлены следующие свойства:
 
-_card — контейнер карточки;
-_cotegory — элемент карточки, отображающий категорию;
-_image — элемент карточки, отображающий изображение;
-_title — элемент карточки, отображающий заголовок;
-_price — элемент карточки, отображающий цену;
-_text — элемент карточки, отображающий описание;
-_button — элемент карточки, отображающий кнопку;
-massCotegory — объект, содержащий отображение категорий карточек на соответствующие классы стилей.
+- _card — контейнер карточки;
+- _cotegory — элемент карточки, отображающий категорию;
+- _image — элемент карточки, отображающий изображение;
+- _title — элемент карточки, отображающий заголовок;
+- _price — элемент карточки, отображающий цену;
+- _text — элемент карточки, отображающий описание;
+- _button — элемент карточки, отображающий кнопку;
+- massCotegory — объект, содержащий отображение категорий карточек на соответствующие классы стилей.
+
+Класс содержит следующие методы:
+
+- Сетер set imgValue: устоновливает изображение.
+
+- Сетер set priceValue устоновливает цену продукта.
+
+- Сетер set cotegoryClass: устоновливает класс категории продукта.
+
+- Сетер set cotegoryValie: устоновливает текс котегории продукта.
+
+- Сетер set titleValue: устоновливает заголовок продукта.
+
+- Сетер set textValue: устоновливает описание продукта.
 
 ```
 
-class BaseCard extends Component<IBaseCard> {
-  _card: HTMLElement;
+export abstract class BaseCard extends Component<IBaseCard> { 
+  
+  protected _card: HTMLElement;
 
-  _cotegory: HTMLElement;
+  protected _cotegory: HTMLElement;
 
-  _image: HTMLImageElement;
+  protected _image: HTMLImageElement;
 
-  _title: HTMLElement;
+  protected _title: HTMLElement;
 
-  _price: HTMLElement;
+  protected _price: HTMLElement;
 
-  _text: HTMLElement;
+  protected _text: HTMLElement;
 
-  _button: HTMLButtonElement;
+  protected _button: HTMLButtonElement;
 
   readonly massCotegory: ImassCotegory
 
-  constructor(_card: HTMLElement)
+  constructor(
+    _card: HTMLElement,
+  )
 
-  set imgValue(product: IProduct)
+  set imgValue(value: string)
 
-  set priceValue(product: IProduct)
-  
-  set cotegoryValue(product: IProduct)
+  set priceValue(value: number | null)
 
-  set titleValue(product: IProduct)
+  set cotegoryClass(className: string)
 
-  set textValue(product: IProduct) 
+  set cotegoryValie(value: string)
+
+  set titleValue(value: string)
+
+  set textValue(value: string)
 }
 
 ```
 
 <a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
 
-<h3 id="6">Вывод карточки на главый экран</h3>
+<h3 id="4">Вывод карточки на главый экран</h3>
 
-Класс CatologProduct, расширяет класс BaseCard. Он используется для создания элементов каталога продуктов.
+Класс CatologProduct, который расширяет класс BaseCard. Класс CatologProduct представляет собой карточку товара в каталоге и добавляет обработчик события клика на эту карточку.
 
-Класс имеет конструктор, который принимает два параметра:
+Основные особенности класса:
 
-_card: HTML-элемент, который будет использоваться для отображения карточки продукта.
-click?: обработчик события click;
+Конструктор принимает корневой элемент карточки _card и опциональный объект click, реализующий интерфейс IMouseClick.
+В конструкторе добавляется обработчик события клика на карточку, который вызывает метод onClick объекта click.
 
 Также в конструкторе добавляется обработчик события click для HTML-элемента _card. При клике по карточке продукта будет вызываться метод emit объекта event с передачей события 'click:card:page' и объекта product.
 
@@ -332,23 +307,15 @@ class CatologProduct extends BaseCard {
 
 <a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
 
-<h3 id="7">Вывод одной карточки</h3>
+<h3 id="5">Вывод одной карточки</h3>
 
-Класс Card, расширяет класс BaseCard. Он используется для создания карточек продуктов.
+Класс Card, который расширяет класс BaseCard. Класс Card представляет собой карточку товара и добавляет возможность управления состоянием кнопки на карточке (например, для добавления товара в корзину) и обработки кликов по этой кнопке.
 
-Класс имеет конструктор, который принимает три параметра:
+Основные особенности класса:
 
-card: HTML-элемент, который будет использоваться для отображения карточки продукта.
-disabled: булевое значение.
-click?: обработчик события click;
-
-Далее проверяется значение disabled если оно равно true, то кнопка на карточке продукта будет отключена с помощью метода setDisabled родительского класса.
-
-Затем в параметре click проверяется, содержит ли массив allProducts объекта basket объект product. Если содержит, то кнопка на карточке продукта будет отключена. Если не содержит, то добавляется обработчик события click для кнопки. При клике по кнопке будет вызываться метод emit объекта event с передачей события 'click:add:basket' и объекта product.
-
-В классе объявлены следующие свойства:
-
-set basketIntex(value: number) - Установливает порядковыый номер товара в корзине;
+Конструктор принимает корневой элемент карточки card, логическое значение disabled и опциональный объект click, реализующий интерфейс IMouseClick.
+Если disabled имеет значение true, устанавливается свойство disabled для кнопки карточки.
+В конструкторе добавляется обработчик события клика на кнопку карточки, который вызывает метод emit объекта event с передачей события. 'click:add:basket'
 
 ```
 
@@ -364,7 +331,7 @@ class Card extends CardsElements {
 
 <a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
 
-<h3 id="8">Карточка в корзине</h3> 
+<h3 id="6">Карточка в корзине</h3> 
 
 Класс CardBasket, расширяет класс CardsElements. Он используется для создания карточек продуктов в корзине.
 
@@ -377,6 +344,10 @@ click?: обработчик события click;
 
 Затем добавляется обработчик события click для кнопки. При клике по кнопке будет вызываться метод emit объекта event с передачей события 'delet:prod:basket' и объекта element.
 
+В классе объявлены следующие свойства:
+
+set basketIntex(value: number) - Установливает порядковыый номер товара в корзине;
+
 ```
 
 class CardBasket extends CardsElements {
@@ -387,6 +358,8 @@ class CardBasket extends CardsElements {
     card: HTMLElement,
     click?: IMouseClick,
   )
+
+  set basketIntex(value: number)
 }
 
 ```
@@ -395,44 +368,58 @@ class CardBasket extends CardsElements {
 
 <h2>Корзина</h2>
 
-<h3 id="9">Класс BasketElement</h3>
+<h3 id="7">Корзина</h3> 
 
-Абстрактный класс BasketElement, расширяет класс Component и реализует интерфейс IBasketElement. Класс описывает структуру и поведение элемента корзины.
+Класс Basket, расширяет класс Component и реализует интерфейс IBasket. Он описывает корзину для покупок с различными элементами управления и функциональностью.
 
-В классе объявлены следующие свойства:
+Основные свойства класса:
 
-basket — контейнер корзины;
-basketList — элемент списка корзины;
-basketButton — кнопка в корзине;
-basketButtonBody: кнопка корзины на главном экране;
-basketPrice — элемент цены корзины;
-events — эмиттер событий.
+basket: корневой элемент корзины.
+basketList: список товаров в корзине.
+basketButton: кнопка для оформления заказа.
+basketButtonBody: дополнительная кнопка, возможно, для управления содержимым корзины.
+_basketPrice: элемент для отображения общей цены товаров в корзине.
+Конструктор класса принимает следующие параметры:
 
-Конструктор класса принимает два параметра: container и basketButtonBody. В теле конструктора вызывается конструктор родительского класса super(container), а затем инициализируются свойства класса.
+container: корневой элемент, в который будет добавлена корзина.
+events: объект, реализующий интерфейс IEvents, для работы с событиями.
+basketButtonBody: кнопка для управления содержимым корзины.
+click: объект, реализующий интерфейс IMouseClick, для обработки кликов по кнопкам.
+В конструкторе устанавливаются ссылки на элементы корзины и добавляются обработчики событий для кнопок.
 
-Метод getList является геттером и возвращает элемент списка корзины.
+Класс предоставляет следующие методы:
 
-Метод clearBasketList очищает список товаров в корзине, устанавливая содержимое элемента basketList пустым.
+Сетер basketPrice: устонавливает значение стоимости корзины.
+Геттер getList: возвращает контейнер basketList.
+Сеттер items: устонавливает переданный массив элементов в basketList и снимает запрет на использование кнопки оформления заказа (basketButton).
+Метод clearBasketList: очищает содержимое basketList, устанавливая его свойство innerHTML в пустую строку.
 
 ```
 
-class BasketElement extends Component<IBasketElement> implements IBasketElement {
-  basket: HTMLElement;
+class Basket extends Component<IBasket> implements IBasket {
+  
+  protected basket: HTMLElement;
 
-  basketList: HTMLElement;
+  protected basketList: HTMLElement;
 
-  basketButton: HTMLButtonElement;
+  protected basketButton: HTMLButtonElement;
 
-  basketPrice: HTMLElement;
+  protected basketButtonBody: HTMLButtonElement;
 
-  basketButtonBody: HTMLButtonElement;
+  protected _basketPrice: HTMLElement;
 
   constructor(
     container: HTMLElement,
+    events: IEvents,
     basketButtonBody: HTMLButtonElement,
+    click: IMouseClick,
   )
 
+  set basketPrice(value: number)
+
   get getList(): HTMLElement
+
+  set items(items: HTMLElement[])
 
   clearBasketList()
 }
@@ -441,161 +428,128 @@ class BasketElement extends Component<IBasketElement> implements IBasketElement 
 
 <a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
 
-<h3 id="10">Класс Basket</h3>
-
-Класс Basket, расширяет класс BasketElement и реализует интерфейс IBasket. Класс описывает структуру и поведение корзины.
-
-Конструктор класса принимает четыре параметра: container, events, basketButtonBody и click. В теле конструктора вызывается конструктор родительского класса super(container, basketButtonBody), а затем добавляется обработчик события клика на кнопку корзины. При клике на кнопку происходит вызов метода emit эмиттера событий events с параметром 'click:form:order'. Также на кнопку добавляеться обработчик события клика на кнопку. При клике на кнопку происходит вызов метода emit эмиттера событий events с параметром 'click:basket' и 'render:basket:list', а также вызываеться метод modal.openModal();
-
-Метод convertToPriceString преобразует числовое значение в строку, представляющую цену в формате, удобном для отображения. Метод использует регулярное выражение для добавления пробелов между тройками цифр и добавляет слово «синапсов» в конце строки.
-
-Метов set items принимает массив HTMLElement[]. После идет проверка на длинну этого массива и если она не рована false выполняется метод replaceChildren который в свою очередь принимает переменное количество аргументов и в контейнере basketList и заменяет дочение элементы на новые. В обратном случае будет также заменены все дочерние элементы basketList на один вновь созданый элемент методом 
-createElement c тектовым содержимым 'В корзине нет товаров'.
-```
-
-class Basket extends BasketElement implements IBasket {
-  constructor(
-    container: HTMLElement,
-    events: EventEmitter,
-  )
-
-  set items(items: HTMLElement[])
-
-  convertToPriceString(value: number): string
-}
-
-```
-
-<a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
-
 <h2>Формы</h2>
 
-<h3 id="11">Форма</h3>
+<h3 id="8">Форма</h3>
 
-Абстрактный класс Form, который расширяет класс Component и реализует интерфейс IForm. Он используется для работы с формами.
+Класс Form, который расширяет класс Component. Класс Form представляет собой базовую структуру для работы с HTML-формами и включает в себя механизмы для обработки ввода данных и отправки формы.
 
-Класс имеет следующие свойства:
+Основные особенности класса:
 
-forms: HTML-элемент формы.
-buttonSubmit: HTML-элемент кнопки отправки формы.
-errorContainer: HTML-элемент контейнера ошибок формы.
-inputsForms: HTMLInputElement[] - массив инпутов формы;
-Конструктор класса принимает HTML-элемент формы в качестве параметра и инициализирует свойства _forms, formValid, _errorContainer и _buttonSubmit.
-
-В конструкторе также добавляется обработчик события click для кнопки отправки формы. При клике по кнопке будет вызываться метод preventDefault, который предотвратит стандартное поведение кнопки (перезагрузку страницы).
-
-Сетер showErrorMessage: устанавливает сообщение об ошибке в контейнере ошибок формы. Принемает строку и с помощью родительского метода setText вставляет текстовое содержимое в контейнер errorContainer.
-
-Сетер getDisablesButton принимает одно булевое значение исходи из которого устонавливает через родительский метод setDisabled булевое значение равное полученому.
-
-```
-
-class Form extends Component<IForm> implements IForm{
-
-  forms: HTMLFormElement;
-
-  buttonSubmit: HTMLButtonElement;
-
-  errorContainer: HTMLElement;
-
-  constructor(forms: HTMLFormElement)
-
-  set showErrorMessage(values: string[])
-
-  set getDisablesButton(bool: boolean)
-}
-
-```
-
-<a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
-
-<h3 id="12">Форма Ордер</h3>
-
-Класс FormOrder, который расширяет класс Form и реализует интерфейс IFormOrder. Он используется для работы с формой заказа.
-
-Класс имеет следующие свойства:
-
-className: Строковое значение классаж
-paymentsButton: HTMLButtonElement[] - массив кнопак оплаты:
-
-Конструктор класса принимает HTML-элемент формы, объект EventEmitter и className в качестве параметров. В конструкторе добавляется обработчик события click для кнопки отправки формы, который вызывает метод emit объекта EventEmitter с передачей события 'click:form:content'.
+- Конструктор принимает корневой элемент формы container и объект events, реализующий интерфейс IEvents.
+- В конструкторе устанавливаются ссылки на кнопку отправки формы _submit и элемент для отображения ошибок _errors.
+- Добавляются обработчики событий для ввода данных в поля формы и отправки формы:
+- При вводе данных в поле формы вызывается метод onInputChange, который передаёт изменения в систему событий.
+- При отправке формы предотвращается стандартное поведение (перезагрузка страницы) и вызывается событие для обработки отправки формы.
 
 Класс предоставляет следующие методы:
 
-Геттер addressInfo который возвращает строковое значение инпута формы.
+- Метод onInputChange: передаёт изменения введённых данных в систему событий.
 
-Геттер paymentInfoкоторый возвращает строковое значение выбраной кнопки оплаты.
+- Метод setValid: устанавливает состояние кнопки отправки формы в зависимости от параметра value: если value равно true, кнопка активируется, иначе — блокируется.
 
-Метод clearInputValue устонавливает у всех инпутов формы строковое значение '';
+- Метод setErrors: устанавливает текст ошибок в элементе _errors.
 
-Метод clearPayment удаляет класс со всех выбраных кнопок оплаты
+- Метод render: обновляет состояние формы на основе переданного объекта state, включая отображение валидности и ошибок, а также обновление входных данных.
 
 ```
 
-class FormOrder extends Form implements IFormOrder {
+class Form<T> extends Component<IFormState> {
 
-  className: string;
+  protected _submit: HTMLButtonElement;
 
-  paymentsButton: HTMLButtonElement[];
+  protected _errors: HTMLElement;
 
-  constructor(
-    form: HTMLFormElement,
-    className: string,
-    click: IMouseClick,
-  )
+  constructor(protected container: HTMLFormElement, protected events: IEvents)
 
-  get paymentInfo(): string
+  protected onInputChange(field: keyof T, value: string)
 
-  get addressInfo(): string
+  set valid(value: boolean)
 
-  clearInputValue()
+  set errors(value: string)
 
-  clearPayment()
+  render(state: Partial<T> & IFormState)
 }
 
 ```
 
 <a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
 
-<h3 id="13">Форма контакты</h3>
+<h3 id="9">Форма ордер</h3>
 
-Класс FormContact, расширяет класс Form и реализует интерфейс IFormContact. Он используется для работы с формой контактов.
+Класс OrderForm, который расширяет класс Form. Класс OrderForm представляет собой форму для выбора способа оплаты и содержит логику для управления кнопками выбора способа оплаты (картой или наличными).
+
+Основные особенности класса:
+
+- Конструктор принимает корневой элемент формы container и объект events, реализующий интерфейс IEvents.
+- В конструкторе устанавливаются ссылки на кнопки выбора способа оплаты _cardButton и _cashButton.
+- Добавляются обработчики событий для кликов по кнопкам выбора способа оплаты, которые вызывают метод onInputChange для передачи изменений в систему событий.
 
 Класс предоставляет следующие методы:
 
-Гетер inputInfo который возвращает массив с двумя параметрами email и phone.
+- Метод disableButtons: удаляет класс button_alt-active у кнопок выбора способа оплаты.
+- Метод setPayment: добавляет или удаляет класс button_alt-active у кнопок в зависимости от переданного значения value.
+- Метод setAddress: устанавливает значение поля адреса в форме.
 
-Метод clearInputValue устонавливает у всех инпутов формы строковое значение '';
 ```
 
-class FormContact extends Form implements IFormContact {
-  constructor(
-    form: HTMLFormElement,
-    click: IMouseClick,
-  )
+class OrderForm extends Form<IOrderField> {
 
-  validInput()
+  protected _cardButton: HTMLButtonElement;
 
-  setInfo(info: string, value: string): void
+  protected _cashButton: HTMLButtonElement;
 
-  get InfoContacts(): IFormsInfo
+  constructor(container: HTMLFormElement, events: IEvents)
 
-  clearValidForm()
+  disableButtons()
+
+  set payment(value: string)
+
+  set address(value: string)
 }
 
 ```
 
 <a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
 
-<h3 id="14">Оповещение об успешном совершение покупки</h3>
+<h3 id="10">Форма контакты</h3>
+
+Класс ContactsForm, который расширяет класс Form. Класс ContactsForm представляет собой форму для ввода контактных данных, таких как телефон и email.
+
+Основные особенности класса:
+
+- Конструктор принимает корневой элемент формы container и объект events, реализующий интерфейс IEvents.
+
+Класс предоставляет следующие методы:
+
+- Сеттер phone устанавливает значение поля ввода телефона в форме.
+- Сеттер email устанавливает значение поля ввода email в форме.
+
+```
+
+class ContactsForm extends Form<IContactField> {
+
+  constructor(container: HTMLFormElement, events: IEvents)
+
+  set phone(value: string)
+
+  set email(value: string)
+}
+
+```
+
+<a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
+
+<h3 id="11">Оповещение об успешном совершение покупки</h3>
 
 Класс Success, реализует интерфейс ISuccess. Он используется для отображения окна с оповещением о завершении покупки.
 
 Класс имеет следующие свойства:
 
-container: HTML-элемент, представляющий контейнер окна оповещения.
-orderSuccessDescription: HTML-элемент, содержащий описание успешного выполнения заказа.
-orderSuccessClose: HTML-элемент (кнопка), используемый для закрытия окна.
+- container: HTML-элемент, представляющий контейнер окна оповещения.
+- orderSuccessDescription: HTML-элемент, содержащий описание успешного выполнения заказа.
+- orderSuccessClose: HTML-элемент (кнопка), используемый для закрытия окна.
+
 Конструктор класса принимает два параметра:
 
 container: HTML-элемент, который будет использоваться в качестве контейнера для окна оповещения.
@@ -604,9 +558,7 @@ modal: объект, реализующий интерфейс IModalWindows, к
 
 Класс предоставляет следующие методы:
 
-getSuccess: возвращает контейнер окна оповещения.
-
-Сетер price: устанавливает стоимость заказа в описании успешного выполнения заказа, преобразуя число в строку и добавляя пробелы для улучшения читаемости.
+- Сетер price: устанавливает стоимость заказа в описании успешного выполнения заказа, преобразуя число в строку и добавляя пробелы для улучшения читаемости.
 
 ```
 
@@ -622,8 +574,6 @@ class Success implements ISuccess {
     click: IMouseClick,
   )
 
-  getSuccess() 
-
   set price(value: number) 
 }
 
@@ -631,58 +581,7 @@ class Success implements ISuccess {
 
 <a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
 
-<h3 id="15">Валидация форм</h3> 
-
-Класс ValidForm, используеться для валидации информации.
-
-Класс имеет следующие свойства:
-
-events: емитор событий;
-
-formValid: буллевый масив со значением валидации форм.
-
-В конструкторе устонавливаются все значения formValid как false для первоначально использования. 
-
-Класс предоставляет следующие методы:
-
-Метод validButtonPayment который принимает масиив HTMLButtonElement и строковое значение класса. Методом перебора массив forEach устонавливаеться обработчик событий клика. Сначала методом перебора массив forEach снимаеться класс, а затем который добавляет класс на кнопку по которй кликнули.
-
-Метод validInputsOrder принимает массив интпутов формы order и методом перебора массив forEach добавляет обработчик событий input. При вводе текста проверяеться длина ведденых данных и если она больше 0 символов то устоновливаеться булевое значение соответствующее полю ввода.
-
-Метод validInputsContact принимает массив интпутов формы сontact и методом перебора массив forEach добавляет обработчик событий input. При вводе текста проверяеться длина ведденых данных и если она больше 0 символов то устоновливаеться булевое значение соответствующее полю ввода.
-
-Метод showErrorMessage принимает массив строк. Методом перебора массив forEach проверяет на соответствие значения с массива ошибок. При соответтвие добавляет строку с ошибкой в массив errors. Возвращает массив errors.
-
-Метов clearFormValid очищает массив FormValid устонавливая все значения как false.
-
-
-```
-
-class ValidForm {
-
-  events: EventEmitter;
-
-  formValid: IFormValid;
-
-  constructor(evens: EventEmitter)
-
-  validButtonPayment(button: HTMLButtonElement[], className: string)
-
-  validInputsOrder(inputs: HTMLInputElement[])
-
-  validInputsContact(inputs: HTMLInputElement[])
-
-  showErrorMessage(values: string[])
-
-  clearFormValid()
-}
-
-```
-
-<a><h1 style="margin-left: 90%;">[Наверх &#8593;](#0)</h1></a>
-
-
-> <h1 id="16">Описание событий</h1>
+> <h1 id="12">Описание событий</h1>
 
 
 ```
@@ -720,17 +619,23 @@ class ValidForm {
 // Отображение формы контакт  
 'click:form:content'
 
-// Валидация кнопок оплаты
-'payment:valid'  
+// Слушатель изменения данных формы ордер  
+/^order\..*:change/
 
-// Валидация инпутов order
-'input:valid:order'  
+// Слушатель изменения данных формы констакты  
+/^contacts\..*:change/
 
-// Валидация инпутов contect
-'input:valid:contact'  
+// Отображение ошибок формы контакт  
+'errors:contact:change'
 
-// Сохранение данных в ордер
-'seve:info:order'  
+// Отображение ошибок формы ордер  
+'errors:order:change'
+
+// Клик на кнопку далее в форме ордер
+'order:submit'
+
+// Клик на кнопку оплатить в форме контакты  
+'contacts:submit'
 
 // Отправка двнных на сервер  
 'send:info:server'

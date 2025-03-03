@@ -1,207 +1,119 @@
-import { IMouseClick } from "../types";
-import { IForm, IFormContact, IFormOrder, IFormValid, IInputValue } from "../types/Form";
-import { settings } from "../utils/constants"
-import { ensureAllElements, ensureElement } from "../utils/utils";
+import { IEvents } from "../types";
+import { IContactField, IOrderField } from "../types/AppData";
+import { IFormState } from "../types/Form";
+import { ensureElement } from "../utils/utils";
 import { Component } from "./base/Component";
-import { EventEmitter } from "./base/events";
 
-/** Класс формы */
-abstract class Form extends Component<IForm> implements IForm {
-  /** Форма */
-  forms: HTMLFormElement;
-
-  /** Кнопка отправки формы */
-  buttonSubmit: HTMLButtonElement;
+export class Form<T> extends Component<IFormState> {
+  /** Кнопки отправки формы */
+  protected _submit: HTMLButtonElement;
 
   /** Контейнер ошибок формы */
-  errorContainer: HTMLElement;
+  protected _errors: HTMLElement;
 
-  /** Инпуты формы */
-  inputsForms: HTMLInputElement[];
+  constructor(protected container: HTMLFormElement, protected events: IEvents) {
 
-  constructor(
-    forms: HTMLFormElement,
-  ) {
-    super(forms)
+    super(container);
 
-    this.forms = forms;
+    this._submit = ensureElement<HTMLButtonElement>('button[type=submit]', this.container);
+    this._errors = ensureElement<HTMLElement>('.form__errors', this.container);
 
-    this.errorContainer = ensureElement('.form__errors', this.forms);
-    this.buttonSubmit = ensureElement<HTMLButtonElement>('button[type=submit]', this.forms);
-    this.inputsForms = ensureAllElements<HTMLInputElement>('.form__input', this.forms);
-    this.buttonSubmit.addEventListener('click', evt => {
-      evt.preventDefault();
+    this.container.addEventListener('input', (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const field = target.name as keyof T;
+      const value = target.value;
+      this.onInputChange(field, value);
+    });
+
+    this.container.addEventListener('submit', (e: Event) => {
+      e.preventDefault();
+      this.events.emit(`${this.container.name}:submit`);
+    });
+
+  }
+
+  /** Вызов события при изменение введенных данных */
+  protected onInputChange(field: keyof T, value: string) {
+    this.events.emit(`${this.container.name}.${String(field)}:change`, {
+      field,
+      value
     });
   }
 
-  /** Установить сообщение ошибки */
-  set showErrorMessage(values: string) {
-    super.setText(this.errorContainer, values);
+  /** Состояние кнопки отправки формы */
+  set valid(value: boolean) {
+    this._submit.disabled = !value;
   }
 
-  /** Отключение кнопки формы */
-  set getDisablesButton(bool: boolean) {
-    bool ? super.setDisabled(this.buttonSubmit, false) : super.setDisabled(this.buttonSubmit, true)
+  /** Установить текс ошибок в форму */
+  set errors(value: string) {
+    this.setText(this._errors, value);
+  }
+
+  /** Рендеринга формы */
+  render(state: Partial<T> & IFormState) {
+    const { valid, errors, ...inputs } = state;
+    super.render({ valid, errors });
+    Object.assign(this, inputs);
+    return this.container;
+  }
+
+}
+
+export class ContactsForm extends Form<IContactField> {
+
+  constructor(container: HTMLFormElement, events: IEvents) {
+    super(container, events);
+  }
+
+  /** Установить значения поля ввода телефон */
+  set phone(value: string) {
+    (this.container.elements.namedItem('phone') as HTMLInputElement).value = value;
+  }
+
+  /** Установить значения поля ввода email */
+  set email(value: string) {
+    (this.container.elements.namedItem('email') as HTMLInputElement).value = value;
   }
 }
 
-/** Класс формы ордер */
-export class FormOrder extends Form implements IFormOrder {
-  /** Класс активной кнопки */
-  className: string;
+export class OrderForm extends Form<IOrderField> {
 
-  /** Кнопки оплаты */
-  paymentsButton: HTMLButtonElement[];
+  protected _cardButton: HTMLButtonElement;
 
-  constructor(
-    form: HTMLFormElement,
-    className: string,
-    click: IMouseClick,
-  ) {
-    super(form)
+  protected _cashButton: HTMLButtonElement;
 
-    this.className = className;
-    this.paymentsButton = ensureAllElements('.button_alt', this.forms);
-    this.buttonSubmit.addEventListener('click', click.onClick);
+  constructor(container: HTMLFormElement, events: IEvents) {
+    super(container, events);
 
+    this._cardButton = ensureElement<HTMLButtonElement>('button[name="card"]', this.container);
+    this._cashButton = ensureElement<HTMLButtonElement>('button[name="cash"]', this.container);
+
+    this._cardButton.classList.add('button_alt-active');
+
+    this._cashButton.addEventListener('click', () => {
+      this.onInputChange('payment', 'cash');
+    });
+
+    this._cardButton.addEventListener('click', () => {
+      this.onInputChange('payment', 'card');
+    });
   }
 
-  /** Получить информацию об оплате */
-  get paymentInfo(): string {
-    let pay: string;
-    this.paymentsButton.forEach(ele => {
-      ele.getAttribute('class').includes(this.className) ? pay = ele.getAttribute('name') : ''
-    })
-    return pay;
+  /** Удалить активный класс с кнопок */
+  disableButtons() {
+    this._cardButton.classList.remove('button_alt-active');
+    this._cashButton.classList.remove('button_alt-active');
   }
 
-  /** Получить адресс доставки */
-  get addressInfo(): string {
-    let address: string
-    this.inputsForms.forEach(ele => {
-      address = ele.value;
-    })
-    return address;
+  /** Установить активный класс на кнопку */
+  set payment(value: string) {
+    this._cashButton.classList.toggle('button_alt-active', value === 'cash');
+    this._cardButton.classList.toggle('button_alt-active', value === 'card');
   }
 
-  /** Очистить поля ввода формы */
-  clearInputValue() {
-    this.inputsForms.forEach(ele => {
-      ele.value = '';
-    })
-  }
-
-  /** Очистить информацию об оплате */
-  clearPayment() {
-    this.paymentsButton.forEach(le => {
-      le.classList.remove(this.className);
-    })
-  }
-}
-
-/** Класс формы контактов */
-export class FormContact extends Form implements IFormContact {
-  constructor(
-    form: HTMLFormElement,
-    click: IMouseClick,
-  ) {
-    super(form);
-
-    this.buttonSubmit.addEventListener('click', click.onClick);
-  }
-
-  /** Получить информацию полей Email и Phone */
-  get inputInfo(): IInputValue {
-    let inputValue: IInputValue = {
-      email: '',
-      phone: ''
-    }
-    this.inputsForms.forEach(ele => {
-      ele.name === 'email' ? inputValue.email = ele.value : '';
-      ele.name === 'phone' ? inputValue.phone = ele.value : '';
-    })
-    return inputValue;
-  }
-
-  /** Очистить поля формы */
-  clearInputValue() {
-    this.inputsForms.forEach(ele => {
-      ele.value = '';
-    })
-  }
-}
-
-export class ValidForm {
-
-  /** Емитер */
-  events: EventEmitter;
-
-  /** Массив валидации формы */
-  formValid: IFormValid;
-
-  constructor(evens: EventEmitter) {
-    this.events = evens;
-    this.formValid = {
-      'formOfPayment': false,
-      'address': false,
-      'email': false,
-      'phone': false,
-    };
-  }
-
-  /** Валидация кнопок оплаты */
-  validButtonPayment(button: HTMLButtonElement[], className: string) {
-    button.forEach(ele => {
-      ele.addEventListener('click', () => {
-        button.forEach(le => {
-          le.classList.remove(className);
-        })
-        ele.classList.add(className);
-        this.formValid.formOfPayment = true;
-        this.events.emit('payment:valid')
-      })
-    })
-  }
-
-  /** Валидация инпутов формы order */
-  validInputsOrder(inputs: HTMLInputElement[]) {
-    inputs.forEach(ele => {
-      ele.addEventListener('input', () => {
-        ele.value.length > 0 ? this.formValid[ele.name as keyof typeof this.formValid] = true : this.formValid[ele.name as keyof typeof this.formValid] = false;
-        this.events.emit('input:valid:order')
-      })
-    })
-  }
-
-  /** Валидация инпутов формы contacts */
-  validInputsContact(inputs: HTMLInputElement[]) {
-    inputs.forEach(ele => {
-      ele.addEventListener('input', () => {
-        ele.value.length > 0 ? this.formValid[ele.name as keyof typeof this.formValid] = true : this.formValid[ele.name as keyof typeof this.formValid] = false;
-        this.events.emit('input:valid:contact')
-      })
-    })
-  }
-
-
-  /** Установить сообщение ошибки */
-  showErrorMessage(values: string[]) {
-    const errors: string[] = [];
-    values.forEach(value => {
-      if (!(this.formValid[value as keyof typeof this.formValid])) {
-        errors.push(settings.errorMessage[value as keyof typeof settings.errorMessage])
-      }
-    })
-    return errors.join(' ');
-  }
-
-  /** Очистить массив валидации */
-  clearFormValid() {
-    this.formValid = {
-      'formOfPayment': false,
-      'address': false,
-      'email': false,
-      'phone': false,
-    }
+  /** Установить значения поля ввода адрес */
+  set address(value: string) {
+    (this.container.elements.namedItem('address') as HTMLInputElement).value = value;
   }
 }
